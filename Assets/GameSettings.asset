@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e87bdddb4e9c0c441a7cd96504c5bc04, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: 
+  BootstrapSceneName: Bootstrap
+  GameplaySceneName: Gameplay
+  BaseLaunchForce: 15
+  LaunchForcePerLevel: 3
+  BaseMaxSpeed: 20
+  MaxSpeedPerLevel: 2
+  BaseSteeringSpeed: 8
+  SteeringSpeedPerLevel: 1.5
+  DownhillAcceleration: 5
+  DragCoefficient: 0.5
+  BaseCoinValue: 1
+  CoinValuePerLevel: 1
+  BaseUpgradeCost: 10
+  UpgradeCostMultiplier: 1.5
+  MaxUpgradeLevel: 10
