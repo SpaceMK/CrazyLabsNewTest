@@ -82,6 +82,7 @@ namespace SledSurfers.Gameplay
         /// </summary>
         public void Tick()
         {
+           
             switch (_currentPhase)
             {
                 case RunPhase.WaitingToLaunch:
@@ -146,7 +147,7 @@ namespace SledSurfers.Gameplay
             }
 
             // Release on button release or after max charge
-            if (_input.LaunchPressed || _player.Slingshot.ChargePercent >= 1f)
+            if (_input.LaunchReleased || _player.Slingshot.ChargePercent >= 1f)
             {
                 _player.Slingshot.Release(_player.Rigidbody);
                 _runSession.StartRun();

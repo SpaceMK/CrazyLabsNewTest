@@ -16,7 +16,9 @@ namespace SledSurfers.Core.Interfaces
         /// True during the frame the launch/action button is pressed.
         /// </summary>
         bool LaunchPressed { get; }
-        
+
+        bool LaunchReleased { get; }
+
         void Enable();
         void Disable();
     }

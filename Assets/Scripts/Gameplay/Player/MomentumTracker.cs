@@ -51,6 +51,7 @@ namespace SledSurfers.Gameplay.Player
 
         public void UpdateSpeed(float currentSpeed)
         {
+            Debug.Log($"Is tracking {_isTracking} -- hasMomentum {HasMomentum}");
             if (!_isTracking || !HasMomentum) return;
 
             _lastSpeed = currentSpeed;

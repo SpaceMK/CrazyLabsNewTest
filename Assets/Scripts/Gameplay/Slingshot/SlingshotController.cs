@@ -68,9 +68,10 @@ namespace SledSurfers.Gameplay.Slingshot
 
             // Launch forward and slightly upward for the arc feel
             Vector3 launchDirection = (Vector3.forward + Vector3.up * 0.3f).normalized;
+            target.isKinematic = false;
             target.AddForce(launchDirection * finalForce, ForceMode.Impulse);
 
-            Debug.Log($"[Slingshot] Released! Force: {finalForce:F1}, Charge: {ChargePercent:P0}");
+            Debug.Log($"[Slingshot] Released! Force: {finalForce:F1}, Charge: {ChargePercent:P0} target - {target.gameObject.name}");
             OnReleased?.Invoke(finalForce);
         }
 

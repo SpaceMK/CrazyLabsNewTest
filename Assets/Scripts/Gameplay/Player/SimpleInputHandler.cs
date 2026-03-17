@@ -15,6 +15,8 @@ namespace SledSurfers.Gameplay.Player
         public float HorizontalInput => _enabled ? Input.GetAxis("Horizontal") : 0f;
         public bool LaunchPressed => _enabled && Input.GetKeyDown(KeyCode.Space);
 
+        public bool LaunchReleased => _enabled && Input.GetKeyUp(KeyCode.Space);
+
         public void Enable() => _enabled = true;
         public void Disable() => _enabled = false;
     }

@@ -7,17 +7,7 @@ using VContainer.Unity;
 
 namespace SledSurfers.Core.DI
 {
-    /// <summary>
-    /// Gameplay scene lifetime scope. Child of RootLifetimeScope.
-    /// Registers per-run services that get disposed when leaving the gameplay scene.
-    /// 
-    /// Inherits from parent scope:
-    ///   ISceneLoader, IGameStateManager, IPlayerDataService, IUpgradeService, GameSettings
-    /// 
-    /// Scene setup:
-    ///   - Player GameObject must have PlayerFacade + PlayerCollisionHandler + Rigidbody + Collider
-    ///   - Assign PlayerFacade reference in the inspector
-    /// </summary>
+    
     public sealed class GameplayLifetimeScope : LifetimeScope
     {
         [SerializeField] private PlayerManager _playerFacade;
@@ -30,8 +20,7 @@ namespace SledSurfers.Core.DI
             builder.Register<RunSession>(Lifetime.Scoped)
                 .As<IRunSession>();
 
-            // Input - using simple legacy input for quick iteration
-            // Swap to InputHandler when Input Actions asset is configured
+
             builder.Register<SimpleInputHandler>(Lifetime.Scoped)
                 .As<IInputHandler>();
 
