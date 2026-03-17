@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace SledSurfers.Core.Services
 {
-    
+    /// <summary>
+    /// Manages game state transitions with validation.
+    /// SRP - only manages state, delegates scene loading and UI to listeners.
+    /// </summary>
     public sealed class GameStateManager : IGameStateManager
     {
         public GameState CurrentState { get; private set; } = GameState.Bootstrap;

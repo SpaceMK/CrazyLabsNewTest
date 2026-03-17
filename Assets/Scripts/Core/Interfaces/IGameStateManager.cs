@@ -1,5 +1,9 @@
 namespace SledSurfers.Core.Interfaces
 {
+    /// <summary>
+    /// Manages high-level game state transitions.
+    /// SRP - only responsible for state, not scene loading or UI.
+    /// </summary>
     public interface IGameStateManager
     {
         GameState CurrentState { get; }

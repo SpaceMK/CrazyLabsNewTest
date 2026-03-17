@@ -5,7 +5,10 @@ using UnityEngine.SceneManagement;
 
 namespace SledSurfers.Core.Services
 {
-   
+    /// <summary>
+    /// Concrete scene loader using Unity's SceneManager.
+    /// Implements ISceneLoader - can be swapped for addressable-based loader later (OCP).
+    /// </summary>
     public sealed class SceneLoaderService : ISceneLoader
     {
         public async UniTask LoadSceneAsync(string sceneName, IProgress<float> progress = null)

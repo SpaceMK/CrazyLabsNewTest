@@ -2,6 +2,10 @@ using UnityEngine;
 
 namespace SledSurfers.Data.ScriptableObjects
 {
+    /// <summary>
+    /// Central configuration for gameplay tuning.
+    /// ScriptableObject allows designers to tweak values without touching code.
+    /// </summary>
     [CreateAssetMenu(fileName = "GameSettings", menuName = "SledSurfers/Game Settings")]
     public class GameSettings : ScriptableObject
     {
