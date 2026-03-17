@@ -1,16 +1,19 @@
+using SledSurfers.Core.Interfaces;
+using SledSurfers.Gameplay.Player;
 using UnityEngine;
 
 namespace SledSurfers.Gameplay.Camera
 {
     /// <summary>
     /// Third-person follow camera mimicking Sled Surfer style.
-    /// Positioned behind and above the player, looking down at the slope.
-    /// Smooth follow with slight lag for natural feel.
+    /// 
+    /// Self-contained - subscribes directly to IPlayerMotor.OnSpeedChanged.
+    /// No need for GameplayFlow to feed it data.
     /// </summary>
     public class PlayerCameraController : MonoBehaviour
     {
         [Header("Target")]
-        [SerializeField] private Transform _target;
+        [SerializeField] private PlayerManager _playerManager;
 
         [Header("Position Settings")]
         [Tooltip("Height above the player")]
@@ -23,10 +26,10 @@ namespace SledSurfers.Gameplay.Camera
         [SerializeField] private float _lookAheadDistance = 10f;
 
         [Header("Smoothing")]
-        [Tooltip("How quickly the camera follows position (lower = smoother)")]
+        [Tooltip("How quickly the camera follows position")]
         [SerializeField] private float _followSpeed = 8f;
 
-        [Tooltip("How quickly the camera rotates to follow (lower = smoother)")]
+        [Tooltip("How quickly the camera rotates to follow")]
         [SerializeField] private float _rotationSpeed = 5f;
 
         [Header("Dynamic Adjustments")]
@@ -54,32 +57,35 @@ namespace SledSurfers.Gameplay.Camera
         [SerializeField] private float _horizontalSmoothSpeed = 4f;
 
         // Runtime state
+        private Transform _target;
+        private IPlayerMotor _motor;
         private Vector3 _currentVelocity;
         private float _smoothedHorizontalOffset;
         private float _currentSpeed;
         private bool _isInitialized;
 
-        private void Start()
+        /// <summary>
+        /// Initialize with player reference. Call after PlayerManager.Initialize().
+        /// </summary>
+        public void Start()
         {
-            if (_target == null)
-            {
-                Debug.LogWarning("[PlayerCameraController] No target assigned. Searching for PlayerManager...");
-                var player = FindFirstObjectByType<Player.PlayerManager>();
-                if (player != null)
-                {
-                    _target = player.transform;
-                }
-            }
+            
+            _target = _playerManager.transform;
+            _motor = _playerManager.Motor;
 
-            if (_target != null)
-            {
-                // Snap to initial position
-                transform.position = CalculateDesiredPosition(0f);
-                transform.rotation = CalculateDesiredRotation();
-                _isInitialized = true;
-            }
+            // Subscribe to motor speed changes - self-contained, no middleman
+            _motor.OnSpeedChanged += HandleSpeedChanged;
+            _motor.OnHalted += HandleHalted;
+
+            // Snap to initial position
+            transform.position = CalculateDesiredPosition(0f);
+            transform.rotation = CalculateDesiredRotation();
+            _isInitialized = true;
+
+            Debug.Log("[PlayerCameraController] Initialized and subscribed to motor events.");
         }
 
+    
         private void LateUpdate()
         {
             if (_target == null || !_isInitialized) return;
@@ -88,27 +94,24 @@ namespace SledSurfers.Gameplay.Camera
             UpdateCameraRotation();
         }
 
-        /// <summary>
-        /// Call this from PlayerManager or GameplayFlow to update speed for dynamic camera.
-        /// </summary>
-        public void UpdateSpeed(float speed)
+        private void OnDestroy()
+        {
+            // Unsubscribe from events
+            if (_motor != null)
+            {
+                _motor.OnSpeedChanged -= HandleSpeedChanged;
+                _motor.OnHalted -= HandleHalted;
+            }
+        }
+
+        private void HandleSpeedChanged(float speed)
         {
             _currentSpeed = speed;
         }
 
-        /// <summary>
-        /// Set the target to follow (call from GameplayFlow or DI setup).
-        /// </summary>
-        public void SetTarget(Transform target)
+        private void HandleHalted()
         {
-            _target = target;
-
-            if (_target != null && !_isInitialized)
-            {
-                transform.position = CalculateDesiredPosition(0f);
-                transform.rotation = CalculateDesiredRotation();
-                _isInitialized = true;
-            }
+            _currentSpeed = 0f;
         }
 
         /// <summary>
@@ -126,7 +129,6 @@ namespace SledSurfers.Gameplay.Camera
 
         private void UpdateCameraPosition()
         {
-            // Smooth horizontal offset based on player's X position
             float targetHorizontalOffset = _target.position.x * _horizontalFollow;
             _smoothedHorizontalOffset = Mathf.Lerp(
                 _smoothedHorizontalOffset,
@@ -136,7 +138,6 @@ namespace SledSurfers.Gameplay.Camera
 
             Vector3 desiredPosition = CalculateDesiredPosition(_smoothedHorizontalOffset);
 
-            // Smooth follow using SmoothDamp for natural feel
             transform.position = Vector3.SmoothDamp(
                 transform.position,
                 desiredPosition,
@@ -149,7 +150,6 @@ namespace SledSurfers.Gameplay.Camera
         {
             Quaternion desiredRotation = CalculateDesiredRotation();
 
-            // Smooth rotation
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 desiredRotation,
@@ -159,14 +159,11 @@ namespace SledSurfers.Gameplay.Camera
 
         private Vector3 CalculateDesiredPosition(float horizontalOffset)
         {
-            // Calculate speed factor (0 to 1)
             float speedFactor = Mathf.Clamp01(_currentSpeed / _maxSpeedReference);
 
-            // Dynamic height and distance based on speed
             float dynamicHeight = _height + (_speedHeightBonus * speedFactor);
             float dynamicDistance = _distance + (_speedDistanceBonus * speedFactor);
 
-            // Position behind and above the player
             Vector3 targetPos = _target.position;
 
             return new Vector3(
@@ -180,21 +177,16 @@ namespace SledSurfers.Gameplay.Camera
         {
             if (_target == null) return transform.rotation;
 
-            // Calculate speed factor for dynamic pitch
             float speedFactor = Mathf.Clamp01(_currentSpeed / _maxSpeedReference);
             float dynamicPitch = _basePitch + (_speedPitchBonus * speedFactor);
 
-            // Look at a point ahead of the player
             Vector3 lookAtPoint = _target.position + Vector3.forward * _lookAheadDistance;
-
-            // Calculate direction and apply pitch
             Vector3 direction = lookAtPoint - transform.position;
             Quaternion lookRotation = Quaternion.LookRotation(direction);
 
-            // Override pitch to maintain consistent downward angle
             Vector3 euler = lookRotation.eulerAngles;
             euler.x = dynamicPitch;
-            euler.z = 0f; // No roll
+            euler.z = 0f;
 
             return Quaternion.Euler(euler);
         }
@@ -202,16 +194,22 @@ namespace SledSurfers.Gameplay.Camera
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            if (_target == null) return;
+            Transform target = _target;
+            if (target == null && _playerManager != null)
+                target = _playerManager.transform;
+            if (target == null) return;
 
-            // Draw camera position
-            Vector3 desiredPos = CalculateDesiredPosition(0f);
+            Vector3 desiredPos = new Vector3(
+                target.position.x * _horizontalFollow,
+                target.position.y + _height,
+                target.position.z - _distance
+            );
+
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(desiredPos, 0.5f);
-            Gizmos.DrawLine(_target.position, desiredPos);
+            Gizmos.DrawLine(target.position, desiredPos);
 
-            // Draw look-at point
-            Vector3 lookAt = _target.position + Vector3.forward * _lookAheadDistance;
+            Vector3 lookAt = target.position + Vector3.forward * _lookAheadDistance;
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(lookAt, 0.3f);
             Gizmos.DrawLine(desiredPos, lookAt);

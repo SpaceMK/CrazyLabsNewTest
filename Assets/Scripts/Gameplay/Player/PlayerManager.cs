@@ -3,31 +3,28 @@ using SledSurfers.Data.ScriptableObjects;
 using SledSurfers.Gameplay.Slingshot;
 using UnityEngine;
 
-
 namespace SledSurfers.Gameplay.Player
 {
     /// <summary>
     /// Facade MonoBehaviour that lives on the Player GameObject.
-    /// Composes runtime instances of IPlayerMotor, ICollisionHandler, etc.
+    /// Composes runtime instances of motor, slingshot, momentum tracker, etc.
     /// 
-    /// This is the bridge between Unity's scene (Rigidbody, Colliders) and
-    /// the DI container. VContainer registers this as a component, and
-    /// GameplayFlow accesses sub-systems through it.
-    /// 
-    /// Facade pattern - single entry point to the player subsystem.
+    /// Sub-systems communicate via events - no need to route through GameplayFlow.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(PlayerCollisionHandler))]
+    [RequireComponent(typeof(PlayerPhysicsController))]
     public sealed class PlayerManager : MonoBehaviour
     {
         private Rigidbody _rigidbody;
         private PlayerCollisionHandler _collisionHandler;
+        private PlayerPhysicsController _physicsController;
 
         private PlayerMotor _motor;
         private SlingshotController _slingshot;
         private MomentumTracker _momentumTracker;
 
-        // Expose interfaces for external consumers (GameplayFlow, UI, etc.)
+        // Expose interfaces for external consumers
         public IPlayerMotor Motor => _motor;
         public ICollisionHandler CollisionHandler => _collisionHandler;
         public ISlingshot Slingshot => _slingshot;
@@ -35,13 +32,14 @@ namespace SledSurfers.Gameplay.Player
         public Rigidbody Rigidbody => _rigidbody;
 
         /// <summary>
-        /// Initialize must be called after Awake, typically by GameplayFlow.
-        /// Passes in DI-resolved dependencies that MonoBehaviours can't receive via constructor.
+        /// Initialize must be called after Awake.
+        /// Creates sub-systems and wires up event subscriptions.
         /// </summary>
-        public void Initialize(GameSettings settings, Data.Models.PlayerData playerData)
+        public void Initialize(GameSettings settings, Data.Models.PlayerData playerData, IInputHandler input)
         {
             _rigidbody = GetComponent<Rigidbody>();
             _collisionHandler = GetComponent<PlayerCollisionHandler>();
+            _physicsController = GetComponent<PlayerPhysicsController>();
 
             // Configure rigidbody defaults
             _rigidbody.isKinematic = true;
@@ -49,12 +47,24 @@ namespace SledSurfers.Gameplay.Player
             _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 
-            // Create sub-systems with player's upgrade levels
-            _motor = new PlayerMotor(_rigidbody, settings, playerData.MaxSpeedLevel, playerData.SteeringLevel);
-            _slingshot = new SlingshotController(settings, playerData.LaunchPowerLevel);
-            _momentumTracker = new MomentumTracker();
+            // Create motor first (other systems depend on it)
+            _motor = new PlayerMotor(
+                _rigidbody,
+                settings,
+                playerData.MaxSpeedLevel,
+                playerData.SteeringLevel
+            );
 
-            Debug.Log("[PlayerFacade] Initialized with player data " +
+            // Create slingshot
+            _slingshot = new SlingshotController(settings, playerData.LaunchPowerLevel);
+
+            // Create momentum tracker - subscribes to motor events internally
+            _momentumTracker = new MomentumTracker(_motor);
+
+            // Initialize physics controller - subscribes to motor events internally
+            _physicsController.Initialize(_motor, input);
+
+            Debug.Log($"[PlayerManager] Initialized " +
                       $"(Speed Lv{playerData.MaxSpeedLevel}, Steering Lv{playerData.SteeringLevel}, " +
                       $"Launch Lv{playerData.LaunchPowerLevel})");
         }
@@ -70,7 +80,13 @@ namespace SledSurfers.Gameplay.Player
             _slingshot.Reset();
             _momentumTracker.StopTracking();
 
-            Debug.Log("[PlayerFacade] Player reset to start position.");
+            Debug.Log("[PlayerManager] Player reset to start position.");
+        }
+
+        private void OnDestroy()
+        {
+            // Cleanup subscriptions
+            (_momentumTracker as MomentumTracker)?.Dispose();
         }
     }
 }

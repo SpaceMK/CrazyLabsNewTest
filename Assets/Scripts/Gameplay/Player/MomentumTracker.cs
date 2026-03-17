@@ -5,77 +5,79 @@ using UnityEngine;
 namespace SledSurfers.Gameplay.Player
 {
     /// <summary>
-    /// Monitors player speed. If speed stays below threshold for a duration, momentum is lost.
-    /// SRP - only monitors, doesn't decide what happens when momentum is lost.
+    /// Tracks player momentum and fires event when player stalls.
+    /// 
+    /// Subscribes directly to IPlayerMotor.OnSpeedChanged - no middleman needed.
+    /// Self-contained system that manages its own state.
     /// </summary>
     public sealed class MomentumTracker : IMomentumTracker
     {
-        private readonly float _minSpeedThreshold;
-        private readonly float _gracePeriod;
+        private readonly IPlayerMotor _motor;
+        private readonly float _stallThreshold;
+        private readonly float _stallDuration;
 
-        private float _timeBelowThreshold;
-        private float _maxSpeedReached;
+        private float _timeUnderThreshold;
         private bool _isTracking;
 
-        public bool HasMomentum { get; private set; } = true;
-        public float MomentumPercent => _maxSpeedReached > 0f
-            ? Mathf.Clamp01(_lastSpeed / _maxSpeedReached)
-            : 0f;
-
-        private float _lastSpeed;
+        public bool IsTracking => _isTracking;
+        public float CurrentMomentum { get; private set; }
 
         public event Action OnMomentumLost;
 
-        /// <param name="minSpeedThreshold">Speed below which the player is considered stalling</param>
-        /// <param name="gracePeriod">Seconds allowed below threshold before momentum is lost</param>
-        public MomentumTracker(float minSpeedThreshold = 1.5f, float gracePeriod = 1.5f)
+        public MomentumTracker(IPlayerMotor motor, float stallThreshold = 2f, float stallDuration = 1.5f)
         {
-            _minSpeedThreshold = minSpeedThreshold;
-            _gracePeriod = gracePeriod;
+            _motor = motor;
+            _stallThreshold = stallThreshold;
+            _stallDuration = stallDuration;
+
+            // Subscribe to motor speed changes
+            _motor.OnSpeedChanged += HandleSpeedChanged;
         }
 
         public void StartTracking()
         {
             _isTracking = true;
-            _timeBelowThreshold = 0f;
-            _maxSpeedReached = 0f;
-            HasMomentum = true;
-
-            Debug.Log("[Momentum] Tracking started.");
+            _timeUnderThreshold = 0f;
+            Debug.Log("[MomentumTracker] Started tracking.");
         }
 
         public void StopTracking()
         {
             _isTracking = false;
+            _timeUnderThreshold = 0f;
+            Debug.Log("[MomentumTracker] Stopped tracking.");
         }
 
-        public void UpdateSpeed(float currentSpeed)
+        private void HandleSpeedChanged(float speed)
         {
-            Debug.Log($"Is tracking {_isTracking} -- hasMomentum {HasMomentum}");
-            if (!_isTracking || !HasMomentum) return;
+            if (!_isTracking) return;
 
-            _lastSpeed = currentSpeed;
+            CurrentMomentum = speed;
 
-            if (currentSpeed > _maxSpeedReached)
+            if (speed < _stallThreshold)
             {
-                _maxSpeedReached = currentSpeed;
-            }
+                // Approximate time since last update (speed events are throttled)
+                _timeUnderThreshold += Time.deltaTime;
 
-            if (currentSpeed < _minSpeedThreshold && _maxSpeedReached > _minSpeedThreshold)
-            {
-                _timeBelowThreshold += Time.deltaTime;
-
-                if (_timeBelowThreshold >= _gracePeriod)
+                if (_timeUnderThreshold >= _stallDuration)
                 {
-                    HasMomentum = false;
-                    Debug.Log("[Momentum] Momentum lost!");
+                    Debug.Log($"[MomentumTracker] Momentum lost! Speed: {speed:F1}");
                     OnMomentumLost?.Invoke();
+                    StopTracking();
                 }
             }
             else
             {
-                _timeBelowThreshold = 0f;
+                _timeUnderThreshold = 0f;
             }
+        }
+
+        /// <summary>
+        /// Call this to unsubscribe from events (cleanup).
+        /// </summary>
+        public void Dispose()
+        {
+            _motor.OnSpeedChanged -= HandleSpeedChanged;
         }
     }
 }

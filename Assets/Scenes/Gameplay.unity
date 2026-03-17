@@ -273,7 +273,7 @@ MonoBehaviour:
     TypeName: SledSurfers.Core.DI.GameLifetimeScope
   autoRun: 1
   autoInjectGameObjects: []
-  _playerFacade: {fileID: 2095817159}
+  _playerManager: {fileID: 2095817159}
 --- !u!4 &1899705938
 Transform:
   m_ObjectHideFlags: 0
@@ -378,6 +378,10 @@ PrefabInstance:
       propertyPath: _target
       value: 
       objectReference: {fileID: 2095817156}
+    - target: {fileID: 7968176076815584475, guid: ef23fbaff47a9df4fbd2290423d97e8e, type: 3}
+      propertyPath: _playerManager
+      value: 
+      objectReference: {fileID: 2095817159}
     - target: {fileID: 8270360848390819323, guid: ef23fbaff47a9df4fbd2290423d97e8e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

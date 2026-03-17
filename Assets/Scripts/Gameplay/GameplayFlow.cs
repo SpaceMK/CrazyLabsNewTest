@@ -1,6 +1,7 @@
 using SledSurfers.Core.Interfaces;
 using SledSurfers.Data.Models;
 using SledSurfers.Data.ScriptableObjects;
+using SledSurfers.Gameplay.Camera;
 using SledSurfers.Gameplay.Player;
 using UnityEngine;
 using VContainer.Unity;
@@ -8,30 +9,31 @@ using VContainer.Unity;
 namespace SledSurfers.Gameplay
 {
     /// <summary>
-    /// Orchestrates the gameplay loop:
-    ///   1. Wait for launch input
-    ///   2. Charge slingshot
-    ///   3. Release → player travels downhill
-    ///   4. Player steers left/right
-    ///   5. Run ends on crash or momentum loss
-    ///   
-    /// SRP - only coordinates sub-systems, doesn't implement physics/input/collision itself.
-    /// DIP - depends entirely on interfaces, resolved via VContainer.
+    /// Slim orchestrator that ONLY manages phase transitions.
     /// 
-    /// Implements VContainer's ITickable for Update loop and IStartable for initialization.
+    /// Responsibilities:
+    ///   - WaitingToLaunch → Charging → Running → Ended
+    ///   - Delegates all actual work to specialized systems
+    ///   
+    /// Does NOT:
+    ///   - Handle physics (PlayerPhysicsController does this)
+    ///   - Track distance (RunSession does this)
+    ///   - Feed camera (Camera subscribes to Motor directly)
+    ///   - Track momentum (MomentumTracker subscribes to Motor directly)
     /// </summary>
-    public sealed class GameplayFlow : IStartable, ITickable, IFixedTickable
+    public sealed class GameplayFlow : IStartable, ITickable
     {
         private readonly IInputHandler _input;
-        private readonly IRunSession _runSession;
         private readonly IGameStateManager _gameState;
         private readonly IPlayerDataService _playerDataService;
         private readonly GameSettings _settings;
         private readonly PlayerManager _player;
+       
 
-        private RunPhase _currentPhase = RunPhase.WaitingToLaunch;
-        private Vector3 _startPosition;
+        private RunSession _runSession;
         private PlayerData _playerData;
+        private Vector3 _startPosition;
+        private RunPhase _currentPhase = RunPhase.WaitingToLaunch;
 
         private enum RunPhase
         {
@@ -43,14 +45,13 @@ namespace SledSurfers.Gameplay
 
         public GameplayFlow(
             IInputHandler input,
-            IRunSession runSession,
             IGameStateManager gameState,
             IPlayerDataService playerDataService,
             GameSettings settings,
-            PlayerManager player)
+            PlayerManager player
+           )
         {
             _input = input;
-            _runSession = runSession;
             _gameState = gameState;
             _playerDataService = playerDataService;
             _settings = settings;
@@ -62,8 +63,13 @@ namespace SledSurfers.Gameplay
             _playerData = _playerDataService.Load();
             _startPosition = _player.transform.position;
 
-            // Initialize player sub-systems with current upgrade levels
-            _player.Initialize(_settings, _playerData);
+            // Initialize player (creates motor, slingshot, momentum tracker)
+            _player.Initialize(_settings, _playerData, _input);
+
+            
+
+            // Create run session
+            _runSession = new RunSession(_player.transform);
 
             // Subscribe to run-ending events
             _player.CollisionHandler.OnCrash += HandleCrash;
@@ -74,15 +80,14 @@ namespace SledSurfers.Gameplay
             _input.Enable();
             _currentPhase = RunPhase.WaitingToLaunch;
 
-            Debug.Log("[GameplayFlow] Ready. Press Space/Tap to start charging slingshot.");
+            Debug.Log("[GameplayFlow] Ready. Press Space/Tap to launch.");
         }
 
         /// <summary>
-        /// Called every frame by VContainer. Handles input and phase transitions.
+        /// Only handles input and phase transitions - no physics here.
         /// </summary>
         public void Tick()
         {
-           
             switch (_currentPhase)
             {
                 case RunPhase.WaitingToLaunch:
@@ -98,34 +103,9 @@ namespace SledSurfers.Gameplay
                     break;
 
                 case RunPhase.Ended:
-                    // Waiting for retry input or UI interaction
                     break;
             }
         }
-
-        /// <summary>
-        /// Called every fixed update by VContainer. Handles physics.
-        /// </summary>
-        public void FixedTick()
-        {
-            if (_currentPhase != RunPhase.Running) return;
-
-            float dt = Time.fixedDeltaTime;
-
-            // Apply continuous physics forces
-            _player.Motor.ApplyDownhillForce(dt);
-            _player.Motor.ApplyDrag(dt);
-            _player.Motor.Steer(_input.HorizontalInput, dt);
-
-            // Track distance
-            float distance = Vector3.Distance(_startPosition, _player.transform.position);
-            _runSession.UpdateDistance(distance);
-
-            // Monitor momentum
-            _player.MomentumTracker.UpdateSpeed(_player.Motor.CurrentSpeed);
-        }
-
-        // --- Phase Handlers ---
 
         private void TickWaitingToLaunch()
         {
@@ -133,44 +113,45 @@ namespace SledSurfers.Gameplay
             {
                 _player.Slingshot.StartCharging();
                 _currentPhase = RunPhase.Charging;
-                Debug.Log("[GameplayFlow] Slingshot charging...");
+                Debug.Log("[GameplayFlow] Charging...");
             }
         }
 
         private void TickCharging()
         {
-            // Access the concrete type to call UpdateCharge (not on the interface
-            // because it's a frame-tick concern, not a consumer concern)
-            if (_player.Slingshot is Slingshot.SlingshotController slingshot)
-            {
-                slingshot.UpdateCharge(Time.deltaTime);
-            }
+            _player.Slingshot.UpdateCharge(Time.deltaTime);
 
-            // Release on button release or after max charge
+            // Release on button release or max charge
             if (_input.LaunchReleased || _player.Slingshot.ChargePercent >= 1f)
             {
-                Vector3 launchForce = _player.Slingshot.Release();
-                _player.Motor.Launch(launchForce);
+                // Get force from slingshot, apply via motor
+                Vector3 force = _player.Slingshot.Release();
+                _player.Motor.Launch(force);
+
+                // Start tracking
                 _runSession.StartRun();
                 _player.MomentumTracker.StartTracking();
+
                 _currentPhase = RunPhase.Running;
-                Debug.Log("[GameplayFlow] Launched! Run started.");
+                Debug.Log("[GameplayFlow] Launched!");
             }
         }
 
         private void TickRunning()
         {
-            // Running phase logic handled in FixedTick for physics
-            // This tick is available for UI updates, effects, etc.
-        }
+            // Distance tracking
+            _runSession.Tick();
 
-        // --- Event Handlers ---
+            // Physics handled by PlayerPhysicsController (subscribes to Motor.OnLaunched)
+            // Camera handled by PlayerCameraController (subscribes to Motor.OnSpeedChanged)
+            // Momentum handled by MomentumTracker (subscribes to Motor.OnSpeedChanged)
+        }
 
         private void HandleCrash()
         {
             if (_currentPhase != RunPhase.Running) return;
 
-            Debug.Log("[GameplayFlow] Player crashed!");
+            Debug.Log("[GameplayFlow] Crashed!");
             EndRun();
         }
 
@@ -178,7 +159,7 @@ namespace SledSurfers.Gameplay
         {
             if (_currentPhase != RunPhase.Running) return;
 
-            Debug.Log("[GameplayFlow] Player lost momentum!");
+            Debug.Log("[GameplayFlow] Momentum lost!");
             EndRun();
         }
 
@@ -198,15 +179,14 @@ namespace SledSurfers.Gameplay
             _player.MomentumTracker.StopTracking();
             _runSession.EndRun();
 
-            // Persist coins earned this run
+            // Persist coins
             _playerData.Coins += _runSession.CoinsCollected;
             _playerDataService.Save(_playerData);
 
             _gameState.TransitionTo(GameState.GameOver);
 
-            Debug.Log($"[GameplayFlow] Run ended. Coins earned: {_runSession.CoinsCollected}, " +
-                      $"Distance: {_runSession.DistanceTraveled:F1}m, " +
-                      $"Total coins: {_playerData.Coins}");
+            Debug.Log($"[GameplayFlow] Run ended. Distance: {_runSession.DistanceTraveled:F1}m, " +
+                      $"Coins: {_runSession.CoinsCollected}");
         }
     }
 }

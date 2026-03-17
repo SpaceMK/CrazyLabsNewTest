@@ -1,13 +1,13 @@
+using System;
+
 namespace SledSurfers.Core.Interfaces
 {
     /// <summary>
-    /// Abstraction for handling collision outcomes.
-    /// ISP - separated from IPlayerMotor since collision response logic != movement physics.
-    /// Consumers subscribe to events without knowing collision detection details.
+    /// Handles player collision events.
     /// </summary>
     public interface ICollisionHandler
     {
-        event System.Action OnCrash;
-        event System.Action<int> OnCoinCollected;
+        event Action OnCrash;
+        event Action<int> OnCoinCollected;
     }
 }

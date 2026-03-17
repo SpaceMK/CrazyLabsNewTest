@@ -10,13 +10,15 @@ namespace SledSurfers.Core.Interfaces
     public interface ISlingshot
     {
         bool IsReady { get; }
+        bool IsCharging { get; }
         float ChargePercent { get; }
 
         event Action OnChargeStarted;
         event Action<float> OnChargeUpdated;
-        event Action<float> OnReleased;
+        event Action<Vector3> OnReleased;
 
         void StartCharging();
+        void UpdateCharge(float deltaTime);
         Vector3 Release();
         void Reset();
     }

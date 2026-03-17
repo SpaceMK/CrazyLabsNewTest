@@ -1,18 +1,22 @@
+using System;
+
 namespace SledSurfers.Core.Interfaces
 {
     /// <summary>
-    /// Monitors player speed and determines if momentum is lost.
-    /// SRP - only tracks momentum state, doesn't end the run itself.
+    /// Tracks player momentum and detects when player has stalled.
+    /// Subscribes to IPlayerMotor.OnSpeedChanged internally.
     /// </summary>
     public interface IMomentumTracker
     {
-        bool HasMomentum { get; }
-        float MomentumPercent { get; }
+        bool IsTracking { get; }
+        float CurrentMomentum { get; }
+
+        /// <summary>
+        /// Fired when player speed drops below threshold for too long.
+        /// </summary>
+        event Action OnMomentumLost;
 
         void StartTracking();
         void StopTracking();
-        void UpdateSpeed(float currentSpeed);
-
-        event System.Action OnMomentumLost;
     }
 }

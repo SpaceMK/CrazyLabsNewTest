@@ -1,6 +1,4 @@
 using SledSurfers.Core.Interfaces;
-using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace SledSurfers.Gameplay.Player
 {
@@ -16,7 +14,6 @@ namespace SledSurfers.Gameplay.Player
 
         public float HorizontalInput => _enabled ? _actions.Gameplay.Steer.ReadValue<float>() : 0f;
         public bool LaunchPressed => _enabled && _actions.Gameplay.Launch.WasPressedThisFrame();
-
         public bool LaunchReleased => _enabled && _actions.Gameplay.Launch.WasReleasedThisFrame();
 
         public InputHandler()

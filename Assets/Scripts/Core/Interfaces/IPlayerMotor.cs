@@ -1,17 +1,34 @@
+using System;
 using UnityEngine;
 
 namespace SledSurfers.Core.Interfaces
 {
     /// <summary>
-    /// Abstraction for player movement physics.
-    /// SRP - only handles forces, velocity, steering. Doesn't know about game state or collisions.
-    /// DIP - gameplay flow depends on this, not on Rigidbody directly.
+    /// Abstraction for player physics/movement.
+    /// Single point of contact for all Rigidbody interactions.
+    /// Exposes events for other systems to subscribe to.
     /// </summary>
     public interface IPlayerMotor
     {
         Vector3 Velocity { get; }
         float CurrentSpeed { get; }
         bool IsMoving { get; }
+
+        /// <summary>
+        /// Fired every physics update with current speed.
+        /// Subscribe: Camera, UI, MomentumTracker.
+        /// </summary>
+        event Action<float> OnSpeedChanged;
+
+        /// <summary>
+        /// Fired when player is launched.
+        /// </summary>
+        event Action OnLaunched;
+
+        /// <summary>
+        /// Fired when player is halted.
+        /// </summary>
+        event Action OnHalted;
 
         void Launch(Vector3 force);
         void Steer(float horizontalInput, float deltaTime);

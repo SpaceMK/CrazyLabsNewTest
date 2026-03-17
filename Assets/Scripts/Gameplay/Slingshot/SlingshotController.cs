@@ -6,24 +6,27 @@ using UnityEngine;
 namespace SledSurfers.Gameplay.Slingshot
 {
     /// <summary>
-    /// Slingshot that charges over time and releases the player downhill.
-    /// Depends on GameSettings for force values (DIP via constructor injection).
+    /// Slingshot that charges over time and calculates launch force.
+    /// Does not apply physics directly - returns force vector for PlayerMotor.
+    /// 
+    /// Exposes events for UI to subscribe to (charge bar, etc).
     /// </summary>
     public sealed class SlingshotController : ISlingshot
     {
         private readonly GameSettings _settings;
         private readonly int _launchPowerLevel;
+        private readonly float _maxChargeTime;
 
         private float _chargeTime;
-        private float _maxChargeTime;
         private bool _isCharging;
 
         public bool IsReady { get; private set; } = true;
+        public bool IsCharging => _isCharging;
         public float ChargePercent => _maxChargeTime > 0f ? Mathf.Clamp01(_chargeTime / _maxChargeTime) : 0f;
 
         public event Action OnChargeStarted;
         public event Action<float> OnChargeUpdated;
-        public event Action<float> OnReleased;
+        public event Action<Vector3> OnReleased;
 
         public SlingshotController(GameSettings settings, int launchPowerLevel)
         {
@@ -44,9 +47,6 @@ namespace SledSurfers.Gameplay.Slingshot
             OnChargeStarted?.Invoke();
         }
 
-        /// <summary>
-        /// Call from MonoBehaviour Update to advance the charge.
-        /// </summary>
         public void UpdateCharge(float deltaTime)
         {
             if (!_isCharging) return;
@@ -56,7 +56,7 @@ namespace SledSurfers.Gameplay.Slingshot
         }
 
         /// <summary>
-        /// Calculates the launch force vector based on current charge.
+        /// Calculates and returns the launch force vector based on current charge.
         /// Does not apply physics - caller should pass this to PlayerMotor.Launch().
         /// </summary>
         public Vector3 Release()
@@ -75,7 +75,7 @@ namespace SledSurfers.Gameplay.Slingshot
             Vector3 force = launchDirection * finalForce;
 
             Debug.Log($"[Slingshot] Released! Force: {finalForce:F1}, Charge: {ChargePercent:P0}");
-            OnReleased?.Invoke(finalForce);
+            OnReleased?.Invoke(force);
 
             return force;
         }

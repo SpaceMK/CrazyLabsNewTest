@@ -1,3 +1,4 @@
+using System;
 using SledSurfers.Core.Interfaces;
 using SledSurfers.Data.ScriptableObjects;
 using UnityEngine;
@@ -5,40 +6,45 @@ using UnityEngine;
 namespace SledSurfers.Gameplay.Player
 {
     /// <summary>
-    /// Handles all player physics: downhill acceleration, steering, drag.
-    /// Wraps a Rigidbody but is injected with settings (DIP).
+    /// Handles all player physics: launch, downhill acceleration, steering, drag.
+    /// Single point of contact for all Rigidbody interactions.
+    /// 
+    /// Exposes events for other systems (Camera, UI, MomentumTracker) to subscribe to.
     /// SRP - only physics, no game logic.
     /// </summary>
     public sealed class PlayerMotor : IPlayerMotor
     {
         private readonly Rigidbody _rigidbody;
         private readonly GameSettings _settings;
-        private readonly int _maxSpeedLevel;
-        private readonly int _steeringLevel;
 
-        private float _maxSpeed;
-        private float _steeringSpeed;
+        private readonly float _maxSpeed;
+        private readonly float _steeringSpeed;
+        private float _lastReportedSpeed;
 
         public Vector3 Velocity => _rigidbody.linearVelocity;
         public float CurrentSpeed => _rigidbody.linearVelocity.magnitude;
         public bool IsMoving => CurrentSpeed > 0.5f;
 
+        public event Action<float> OnSpeedChanged;
+        public event Action OnLaunched;
+        public event Action OnHalted;
+
         public PlayerMotor(Rigidbody rigidbody, GameSettings settings, int maxSpeedLevel, int steeringLevel)
         {
             _rigidbody = rigidbody;
             _settings = settings;
-            _maxSpeedLevel = maxSpeedLevel;
-            _steeringLevel = steeringLevel;
 
-            _maxSpeed = _settings.BaseMaxSpeed + _settings.MaxSpeedPerLevel * (_maxSpeedLevel - 1);
-            _steeringSpeed = _settings.BaseSteeringSpeed + _settings.SteeringSpeedPerLevel * (_steeringLevel - 1);
+            _maxSpeed = _settings.BaseMaxSpeed + _settings.MaxSpeedPerLevel * (maxSpeedLevel - 1);
+            _steeringSpeed = _settings.BaseSteeringSpeed + _settings.SteeringSpeedPerLevel * (steeringLevel - 1);
         }
 
         public void Launch(Vector3 force)
         {
             _rigidbody.isKinematic = false;
             _rigidbody.AddForce(force, ForceMode.Impulse);
+
             Debug.Log($"[PlayerMotor] Launched with force: {force.magnitude:F1}");
+            OnLaunched?.Invoke();
         }
 
         public void Steer(float horizontalInput, float deltaTime)
@@ -64,14 +70,12 @@ namespace SledSurfers.Gameplay.Player
         {
             if (CurrentSpeed >= _maxSpeed) return;
 
-            // Continuous forward + downward force simulating gravity on a slope
             Vector3 downhillForce = Vector3.forward * _settings.DownhillAcceleration;
             _rigidbody.AddForce(downhillForce, ForceMode.Acceleration);
         }
 
         public void ApplyDrag(float deltaTime)
         {
-            // Speed-based drag to create natural deceleration on flat/uphill sections
             Vector3 vel = _rigidbody.linearVelocity;
             float forwardSpeed = vel.z;
 
@@ -87,6 +91,14 @@ namespace SledSurfers.Gameplay.Player
             {
                 _rigidbody.linearVelocity = vel.normalized * _maxSpeed;
             }
+
+            // Notify subscribers of speed change (throttled to avoid spam)
+            float speed = CurrentSpeed;
+            if (Mathf.Abs(speed - _lastReportedSpeed) > 0.1f)
+            {
+                _lastReportedSpeed = speed;
+                OnSpeedChanged?.Invoke(speed);
+            }
         }
 
         public void Halt()
@@ -94,6 +106,10 @@ namespace SledSurfers.Gameplay.Player
             _rigidbody.linearVelocity = Vector3.zero;
             _rigidbody.angularVelocity = Vector3.zero;
             _rigidbody.isKinematic = true;
+
+            _lastReportedSpeed = 0f;
+            OnSpeedChanged?.Invoke(0f);
+            OnHalted?.Invoke();
         }
     }
 }
