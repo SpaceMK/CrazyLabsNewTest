@@ -149,7 +149,8 @@ namespace SledSurfers.Gameplay
             // Release on button release or after max charge
             if (_input.LaunchReleased || _player.Slingshot.ChargePercent >= 1f)
             {
-                _player.Slingshot.Release(_player.Rigidbody);
+                Vector3 launchForce = _player.Slingshot.Release();
+                _player.Motor.Launch(launchForce);
                 _runSession.StartRun();
                 _player.MomentumTracker.StartTracking();
                 _currentPhase = RunPhase.Running;

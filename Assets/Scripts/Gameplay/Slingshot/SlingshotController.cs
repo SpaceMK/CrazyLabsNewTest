@@ -55,9 +55,13 @@ namespace SledSurfers.Gameplay.Slingshot
             OnChargeUpdated?.Invoke(ChargePercent);
         }
 
-        public void Release(Rigidbody target)
+        /// <summary>
+        /// Calculates the launch force vector based on current charge.
+        /// Does not apply physics - caller should pass this to PlayerMotor.Launch().
+        /// </summary>
+        public Vector3 Release()
         {
-            if (!_isCharging) return;
+            if (!_isCharging) return Vector3.zero;
 
             _isCharging = false;
 
@@ -68,11 +72,12 @@ namespace SledSurfers.Gameplay.Slingshot
 
             // Launch forward and slightly upward for the arc feel
             Vector3 launchDirection = (Vector3.forward + Vector3.up * 0.3f).normalized;
-            target.isKinematic = false;
-            target.AddForce(launchDirection * finalForce, ForceMode.Impulse);
+            Vector3 force = launchDirection * finalForce;
 
-            Debug.Log($"[Slingshot] Released! Force: {finalForce:F1}, Charge: {ChargePercent:P0} target - {target.gameObject.name}");
+            Debug.Log($"[Slingshot] Released! Force: {finalForce:F1}, Charge: {ChargePercent:P0}");
             OnReleased?.Invoke(finalForce);
+
+            return force;
         }
 
         public void Reset()

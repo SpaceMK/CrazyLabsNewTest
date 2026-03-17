@@ -1,22 +1,23 @@
+using System;
 using UnityEngine;
 
 namespace SledSurfers.Core.Interfaces
 {
     /// <summary>
-    /// Abstraction for the slingshot launch mechanic.
-    /// SRP - only handles launch force calculation and execution.
+    /// Abstraction for slingshot charge-and-release mechanics.
+    /// Returns force vector on release - physics applied by IPlayerMotor.
     /// </summary>
     public interface ISlingshot
     {
         bool IsReady { get; }
         float ChargePercent { get; }
 
-        void StartCharging();
-        void Release(Rigidbody target);
-        void Reset();
+        event Action OnChargeStarted;
+        event Action<float> OnChargeUpdated;
+        event Action<float> OnReleased;
 
-        event System.Action OnChargeStarted;
-        event System.Action<float> OnChargeUpdated;
-        event System.Action<float> OnReleased;
+        void StartCharging();
+        Vector3 Release();
+        void Reset();
     }
 }
