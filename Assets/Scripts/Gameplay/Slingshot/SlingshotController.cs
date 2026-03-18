@@ -5,13 +5,7 @@ using UnityEngine;
 
 namespace SledSurfers.Gameplay.Slingshot
 {
-    /// <summary>
-    /// Slingshot that charges over time and calculates launch force.
-    /// Does not apply physics directly - returns force vector for PlayerMotor.
-    /// 
-    /// Exposes events for UI to subscribe to (charge bar, etc).
-    /// </summary>
-    public sealed class SlingshotController : ISlingshot
+    public class SlingshotController : ISlingshot
     {
         private readonly GameSettings _settings;
         private readonly int _launchPowerLevel;
@@ -55,10 +49,6 @@ namespace SledSurfers.Gameplay.Slingshot
             OnChargeUpdated?.Invoke(ChargePercent);
         }
 
-        /// <summary>
-        /// Calculates and returns the launch force vector based on current charge.
-        /// Does not apply physics - caller should pass this to PlayerMotor.Launch().
-        /// </summary>
         public Vector3 Release()
         {
             if (!_isCharging) return Vector3.zero;
@@ -69,8 +59,6 @@ namespace SledSurfers.Gameplay.Slingshot
                 + _settings.LaunchForcePerLevel * (_launchPowerLevel - 1);
 
             float finalForce = launchForce * ChargePercent;
-
-            // Launch forward and slightly upward for the arc feel
             Vector3 launchDirection = (Vector3.forward + Vector3.up * 0.3f).normalized;
             Vector3 force = launchDirection * finalForce;
 

@@ -17,12 +17,8 @@ namespace SledSurfers.Core.DI
         {
             Debug.Log("[DI] Configuring GameplayLifetimeScope...");
 
-          
-            builder.Register<RunSession>(Lifetime.Scoped)
-                .As<IRunSession>();
-
-
-            builder.Register<SimpleInputHandler>(Lifetime.Scoped)
+         
+            builder.Register<InputHandler>(Lifetime.Scoped)
                 .As<IInputHandler>();
 
             // Scene MonoBehaviour references

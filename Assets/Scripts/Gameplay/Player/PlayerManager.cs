@@ -14,12 +14,12 @@ namespace SledSurfers.Gameplay.Player
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(PlayerCollisionHandler))]
     [RequireComponent(typeof(PlayerPhysicsController))]
-    public sealed class PlayerManager : MonoBehaviour
+    public class PlayerManager : MonoBehaviour
     {
         private Rigidbody _rigidbody;
         private PlayerCollisionHandler _collisionHandler;
         private PlayerPhysicsController _physicsController;
-
+        private Vector3 _startingPosition;
         private PlayerMotor _motor;
         private SlingshotController _slingshot;
         private MomentumTracker _momentumTracker;
@@ -31,10 +31,8 @@ namespace SledSurfers.Gameplay.Player
         public IMomentumTracker MomentumTracker => _momentumTracker;
         public Rigidbody Rigidbody => _rigidbody;
 
-        /// <summary>
-        /// Initialize must be called after Awake.
-        /// Creates sub-systems and wires up event subscriptions.
-        /// </summary>
+        public float FinalDistance = 0f;
+
         public void Initialize(GameSettings settings, Data.Models.PlayerData playerData, IInputHandler input)
         {
             _rigidbody = GetComponent<Rigidbody>();
@@ -69,9 +67,18 @@ namespace SledSurfers.Gameplay.Player
                       $"Launch Lv{playerData.LaunchPowerLevel})");
         }
 
-        /// <summary>
-        /// Reset player to initial position/state for retry.
-        /// </summary>
+        private void Start()
+        {
+            _startingPosition = transform.position;
+        }
+
+
+        public void CalculateDistance()
+        {
+           FinalDistance = Vector3.Distance(_startingPosition,transform.position); 
+           Debug.Log($"[PlayerManager] Final distance traveled: {FinalDistance:F2} units.");
+        }
+
         public void ResetPlayer(Vector3 startPosition)
         {
             _motor.Halt();
