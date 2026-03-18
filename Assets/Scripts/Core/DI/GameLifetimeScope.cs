@@ -2,6 +2,7 @@ using SledSurfers.Core.Interfaces;
 using SledSurfers.Core.SceneManagement;
 using SledSurfers.Core.Services;
 using SledSurfers.Data.ScriptableObjects;
+using SledSurfers.Pooling;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -13,7 +14,7 @@ namespace SledSurfers.Core.DI
         [SerializeField] private GameSettings _gameSettings;
 
         protected override void Awake()
-        { 
+        {
             DontDestroyOnLoad(gameObject);
             base.Awake();
         }
@@ -22,9 +23,10 @@ namespace SledSurfers.Core.DI
         {
             Debug.Log("[DI] Configuring RootLifetimeScope...");
 
-
+           
             builder.RegisterInstance(_gameSettings);
 
+            // Core Services
             builder.Register<SceneLoaderService>(Lifetime.Singleton)
                 .As<ISceneLoader>();
 
@@ -36,6 +38,10 @@ namespace SledSurfers.Core.DI
 
             builder.Register<UpgradeService>(Lifetime.Singleton)
                 .As<IUpgradeService>();
+
+            
+            builder.Register<PoolManager>(Lifetime.Singleton)
+                .As<IPoolManager>();
 
             builder.RegisterEntryPoint<BootstrapFlow>();
         }
