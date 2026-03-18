@@ -18,7 +18,7 @@ namespace SledSurfers.Core.DI
         {
             Debug.Log("[DI] Configuring GameplayLifetimeScope...");
 
-            builder.Register<InputHandler>(Lifetime.Scoped)
+            builder.Register<SimpleInputHandler>(Lifetime.Scoped)
                 .As<IInputHandler>();
             builder.RegisterComponent(_playerManager);
            

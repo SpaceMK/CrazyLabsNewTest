@@ -1,5 +1,6 @@
 using System;
 using SledSurfers.Core.Interfaces;
+using SledSurfers.Gameplay.Level;
 using UnityEngine;
 
 namespace SledSurfers.Gameplay.Player
@@ -14,13 +15,15 @@ namespace SledSurfers.Gameplay.Player
     {
         private const string ObstacleTag = "Obstacle";
         private const string CoinTag = "Coin";
-
+        private CoinLevelManager _coinLevelManager;
         public event Action OnCrash;
         public event Action<int> OnCoinCollected;
 
-        /// <summary>
-        /// Initialize with pool manager reference.
-        /// </summary>
+        public void Initialize(CoinLevelManager coinLevelManager)
+        {
+            _coinLevelManager = coinLevelManager;
+            Debug.Log($"[PlayerCollisionHandler] PoolManager injected successfully");
+        }
        
 
         private void OnCollisionEnter(Collision collision)
@@ -34,22 +37,15 @@ namespace SledSurfers.Gameplay.Player
 
         private void OnTriggerEnter(Collider other)
         {
+            Debug.Log($"[Trigger] Entered trigger: {other.gameObject.name} with tag {other.gameObject.tag}");
             if (other.CompareTag(CoinTag))
             {
                 Debug.Log($"[Collision] Coin collected: {other.gameObject.name}");
 
                 // Notify listeners
                 OnCoinCollected?.Invoke(1);
-
-                // Return to pool
-               /* if (_poolManager != null)
-                {
-                    _poolManager.Despawn(other.gameObject);
-                }
-                else
-                {
-                    other.gameObject.SetActive(false);
-                }*/
+                _coinLevelManager.DespawnCoin(other.gameObject);
+               
             }
         }
     }

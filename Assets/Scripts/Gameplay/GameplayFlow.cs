@@ -1,22 +1,34 @@
-using SledSurfers.Core.Interfaces;
+﻿using SledSurfers.Core.Interfaces;
 using SledSurfers.Data.Models;
 using SledSurfers.Data.ScriptableObjects;
+using SledSurfers.Gameplay.Level;
 using SledSurfers.Gameplay.Player;
 using UnityEngine;
 using VContainer.Unity;
 
 namespace SledSurfers.Gameplay
 {
-    public class GameplayFlow : IStartable, ITickable
+    /// <summary>
+    /// Orchestrates the gameplay loop:
+    ///   1. Wait for launch input
+    ///   2. Charge slingshot
+    ///   3. Release → player travels downhill
+    ///   4. Player steers left/right
+    ///   5. Run ends on crash or momentum loss
+    /// </summary>
+    public sealed class GameplayFlow : IStartable, ITickable
     {
         private readonly IInputHandler _input;
         private readonly IGameStateManager _gameState;
         private readonly IPlayerDataService _playerDataService;
         private readonly GameSettings _settings;
         private readonly PlayerManager _player;
-       
-        
+        private readonly CoinLevelManager _coinLevelManager;
+       //private readonly ObstacleLevelManager _obstacleLevelManager;
+
         private PlayerData _playerData;
+        private Vector3 _startPosition;
+        private int _coinsCollected;
         private RunPhase _currentPhase = RunPhase.WaitingToLaunch;
 
         private enum RunPhase
@@ -32,26 +44,28 @@ namespace SledSurfers.Gameplay
             IGameStateManager gameState,
             IPlayerDataService playerDataService,
             GameSettings settings,
-            PlayerManager player
-           )
+            PlayerManager player,
+            CoinLevelManager coinLevelManager)
+           
         {
             _input = input;
             _gameState = gameState;
             _playerDataService = playerDataService;
             _settings = settings;
             _player = player;
+            _coinLevelManager = coinLevelManager;
+           
         }
 
         public void Start()
         {
             _playerData = _playerDataService.Load();
-           
-            // Initialize player (creates motor, slingshot, momentum tracker)
-            _player.Initialize(_settings, _playerData, _input);
-            // Create run session
-           
+            _startPosition = _player.transform.position;
 
-            // Subscribe to run-ending events
+            // Initialize player
+            _player.Initialize(_settings, _playerData, _input);
+
+            // Subscribe to events
             _player.CollisionHandler.OnCrash += HandleCrash;
             _player.CollisionHandler.OnCoinCollected += HandleCoinCollected;
             _player.MomentumTracker.OnMomentumLost += HandleMomentumLost;
@@ -63,11 +77,15 @@ namespace SledSurfers.Gameplay
             Debug.Log("[GameplayFlow] Ready. Press Space/Tap to launch.");
         }
 
-        /// <summary>
-        /// Only handles input and phase transitions - no physics here.
-        /// </summary>
         public void Tick()
         {
+            // Debug restart
+            if (UnityEngine.Input.GetKeyDown(KeyCode.R))
+            {
+                Retry();
+                return;
+            }
+
             switch (_currentPhase)
             {
                 case RunPhase.WaitingToLaunch:
@@ -79,7 +97,6 @@ namespace SledSurfers.Gameplay
                     break;
 
                 case RunPhase.Running:
-                    break;
                 case RunPhase.Ended:
                     break;
             }
@@ -99,23 +116,17 @@ namespace SledSurfers.Gameplay
         {
             _player.Slingshot.UpdateCharge(Time.deltaTime);
 
-            // Release on button release or max charge
-            if (_input.LaunchReleased || _player.Slingshot.ChargePercent >= 1f)
+            if (_input.LaunchReleased)
             {
-                // Get force from slingshot, apply via motor
                 Vector3 force = _player.Slingshot.Release();
                 _player.Motor.Launch(force);
-
-                // Start tracking
-             
                 _player.MomentumTracker.StartTracking();
 
+                _coinsCollected = 0;
                 _currentPhase = RunPhase.Running;
                 Debug.Log("[GameplayFlow] Launched!");
             }
         }
-
-       
 
         private void HandleCrash()
         {
@@ -127,7 +138,6 @@ namespace SledSurfers.Gameplay
 
         private void HandleMomentumLost()
         {
-
             if (_currentPhase != RunPhase.Running) return;
 
             Debug.Log("[GameplayFlow] Momentum lost!");
@@ -139,18 +149,48 @@ namespace SledSurfers.Gameplay
             if (_currentPhase != RunPhase.Running) return;
 
             int value = _settings.BaseCoinValue + _settings.CoinValuePerLevel * (_playerData.CoinValueLevel - 1);
-            
+            _coinsCollected += amount * value;
+
+            Debug.Log($"[GameplayFlow] Coin collected! Total: {_coinsCollected}");
         }
 
         private void EndRun()
         {
+            _currentPhase = RunPhase.Ended;
             _input.Disable();
             _player.Motor.Halt();
             _player.MomentumTracker.StopTracking();
-            _player.CalculateDistance();
+
+            // Calculate distance
+            float distance = _player.FinalDistance;
+
+            // Save coins
+            _playerData.Coins += _coinsCollected;
             _playerDataService.Save(_playerData);
-            _currentPhase = RunPhase.Ended;
+
             _gameState.TransitionTo(GameState.GameOver);
+
+            Debug.Log($"[GameplayFlow] Run ended. Distance: {distance:F1}m, Coins: {_coinsCollected}");
+        }
+
+        /// <summary>
+        /// Call to restart the run.
+        /// </summary>
+        public void Retry()
+        {
+            // Reset player
+            _player.ResetPlayer(_startPosition);
+
+            // Reset level objects
+            _coinLevelManager.Reset();
+            //_obstacleLevelManager.Reset();
+
+            // Reset state
+            _coinsCollected = 0;
+            _currentPhase = RunPhase.WaitingToLaunch;
+            _input.Enable();
+
+            Debug.Log("[GameplayFlow] Retry - ready to launch.");
         }
     }
 }
