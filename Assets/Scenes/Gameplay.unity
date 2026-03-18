@@ -119,6 +119,54 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &904734854
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 904734855}
+  - component: {fileID: 904734856}
+  m_Layer: 0
+  m_Name: CoinManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &904734855
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 904734854}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &904734856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 904734854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbef4c8ca2cfdbf4fb267d94b1b5a44e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _minBounds: {x: -1.85, y: 1, z: 10}
+  _maxBounds: {x: 1.96, y: 1, z: 50.3}
+  _coinCount: 20
+  _coinHeight: 1
 --- !u!1 &1036478949
 GameObject:
   m_ObjectHideFlags: 0
@@ -128,7 +176,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1036478951}
-  - component: {fileID: 1036478950}
+  - component: {fileID: 1036478952}
   m_Layer: 0
   m_Name: LevelSpawner
   m_TagString: Untagged
@@ -136,32 +184,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1036478950
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1036478949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 157c654fa9fa83e43b0f1641f0fcec60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _coinPrefab: {fileID: 0}
-  _obstaclePrefab: {fileID: 0}
-  _prewarmCoins: 20
-  _prewarmObstacles: 15
-  _laneWidth: 3
-  _laneCount: 3
-  _spawnOnStart: 1
-  _initialSpawnDistance: 100
-  _initialSpawnInterval: 5
-  _initialSpawnStartZ: 10
-  _spawnDuringGameplay: 1
-  _spawnAheadDistance: 50
-  _spawnInterval: 5
-  _obstacleChance: 0.5
 --- !u!4 &1036478951
 Transform:
   m_ObjectHideFlags: 0
@@ -177,6 +199,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1036478952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1036478949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46cbb44552d665f4d99282c6522f4212, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _config: {fileID: 11400000, guid: be54e54a7e8c82140a4e93d62ee64123, type: 2}
+  _poolParent: {fileID: 1036478951}
 --- !u!1 &1230968204
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,7 +368,8 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _playerManager: {fileID: 2095817159}
-  _levelSpawner: {fileID: 0}
+  _coinLevelManager: {fileID: 904734856}
+  _levelPoolProvider: {fileID: 1036478952}
 --- !u!4 &1899705938
 Transform:
   m_ObjectHideFlags: 0
@@ -551,9 +588,10 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1899705938}
   - {fileID: 6976323888334801108}
   - {fileID: 1230968206}
-  - {fileID: 1899705938}
   - {fileID: 7753168229027299736}
   - {fileID: 2095817155}
   - {fileID: 1036478951}
+  - {fileID: 904734855}

@@ -5,11 +5,8 @@ using UnityEngine;
 namespace SledSurfers.Gameplay.Player
 {
     /// <summary>
-    /// MonoBehaviour that listens for Unity collision/trigger events and
-    /// raises typed events through ICollisionHandler.
-    /// 
-    /// SRP - only translates Unity callbacks into domain events.
-    /// Must live on the player GameObject (requires Collider + Rigidbody).
+    /// Handles player collisions with obstacles and collectibles.
+    /// Notifies PoolManager to return collected coins to pool.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Collider))]
@@ -21,11 +18,16 @@ namespace SledSurfers.Gameplay.Player
         public event Action OnCrash;
         public event Action<int> OnCoinCollected;
 
+        /// <summary>
+        /// Initialize with pool manager reference.
+        /// </summary>
+       
+
         private void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.CompareTag(ObstacleTag))
             {
-                Debug.Log($"[Collision] Crashed into obstacle: {collision.gameObject.name}");
+                Debug.Log($"[Collision] Crashed into: {collision.gameObject.name}");
                 OnCrash?.Invoke();
             }
         }
@@ -35,8 +37,19 @@ namespace SledSurfers.Gameplay.Player
             if (other.CompareTag(CoinTag))
             {
                 Debug.Log($"[Collision] Coin collected: {other.gameObject.name}");
+
+                // Notify listeners
                 OnCoinCollected?.Invoke(1);
-                other.gameObject.SetActive(false);
+
+                // Return to pool
+               /* if (_poolManager != null)
+                {
+                    _poolManager.Despawn(other.gameObject);
+                }
+                else
+                {
+                    other.gameObject.SetActive(false);
+                }*/
             }
         }
     }

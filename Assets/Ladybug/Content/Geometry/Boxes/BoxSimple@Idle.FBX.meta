@@ -1,44 +1,110 @@
 fileFormatVersion: 2
 guid: 2a20a0bf5e20e364a811feb708734a39
-timeCreated: 1507289598
-licenseType: Pro
 ModelImporter:
-  serializedVersion: 22
-  fileIDToRecycleName:
-    100000: //RootNode
-    100002: Capac
-    100004: CapacTop
-    100006: CapatFundaLeft
-    100008: CapatFundaRight
-    100010: CutieBaza
-    100012: CutieMisloc
-    100014: CutieSus
-    100016: FundaLeft
-    100018: FundaLeft_b
-    100020: FundaRight
-    100022: FundaRight_b
-    100024: Gift_box_base
-    100026: Gift_box_cover
-    400000: //RootNode
-    400002: Capac
-    400004: CapacTop
-    400006: CapatFundaLeft
-    400008: CapatFundaRight
-    400010: CutieBaza
-    400012: CutieMisloc
-    400014: CutieSus
-    400016: FundaLeft
-    400018: FundaLeft_b
-    400020: FundaRight
-    400022: FundaRight_b
-    400024: Gift_box_base
-    400026: Gift_box_cover
-    4300000: Gift_box_base
-    4300002: Gift_box_cover
-    7400000: Take 001
-    9500000: //RootNode
-    13700000: Gift_box_base
-    13700002: Gift_box_cover
+  serializedVersion: 22200
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: //RootNode
+  - first:
+      1: 100002
+    second: Capac
+  - first:
+      1: 100004
+    second: CapacTop
+  - first:
+      1: 100006
+    second: CapatFundaLeft
+  - first:
+      1: 100008
+    second: CapatFundaRight
+  - first:
+      1: 100010
+    second: CutieBaza
+  - first:
+      1: 100012
+    second: CutieMisloc
+  - first:
+      1: 100014
+    second: CutieSus
+  - first:
+      1: 100016
+    second: FundaLeft
+  - first:
+      1: 100018
+    second: FundaLeft_b
+  - first:
+      1: 100020
+    second: FundaRight
+  - first:
+      1: 100022
+    second: FundaRight_b
+  - first:
+      1: 100024
+    second: Gift_box_base
+  - first:
+      1: 100026
+    second: Gift_box_cover
+  - first:
+      4: 400000
+    second: //RootNode
+  - first:
+      4: 400002
+    second: Capac
+  - first:
+      4: 400004
+    second: CapacTop
+  - first:
+      4: 400006
+    second: CapatFundaLeft
+  - first:
+      4: 400008
+    second: CapatFundaRight
+  - first:
+      4: 400010
+    second: CutieBaza
+  - first:
+      4: 400012
+    second: CutieMisloc
+  - first:
+      4: 400014
+    second: CutieSus
+  - first:
+      4: 400016
+    second: FundaLeft
+  - first:
+      4: 400018
+    second: FundaLeft_b
+  - first:
+      4: 400020
+    second: FundaRight
+  - first:
+      4: 400022
+    second: FundaRight_b
+  - first:
+      4: 400024
+    second: Gift_box_base
+  - first:
+      4: 400026
+    second: Gift_box_cover
+  - first:
+      43: 4300000
+    second: Gift_box_base
+  - first:
+      43: 4300002
+    second: Gift_box_cover
+  - first:
+      74: 7400000
+    second: Take 001
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: Gift_box_base
+  - first:
+      137: 13700002
+    second: Gift_box_cover
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -46,7 +112,7 @@ ModelImporter:
       name: 01 - Default
     second: {fileID: 2100000, guid: c4c3ed014443e044597c4e41a6ea4af3, type: 2}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 0
@@ -55,14 +121,14 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
+    importConstraints: 0
     animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
@@ -74,33 +140,52 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 0.1
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 0
     importVisibility: 0
     importBlendShapes: 1
     importCameras: 0
     importLights: 0
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 2
     tangentImportMode: 2
     normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 2
+    normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -110,14 +195,19 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 0.1
     rootMotionBoneName: 
-    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

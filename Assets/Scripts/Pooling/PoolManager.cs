@@ -1,153 +1,132 @@
 using System.Collections.Generic;
 using SledSurfers.Core.Interfaces;
+using SledSurfers.Core.Pooling;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace SledSurfers.Core.Services
 {
     /// <summary>
-    /// Manages object pools using Unity's built-in ObjectPool.
-    /// 
-    /// Each prefab gets its own pool. Objects implement IPoolable
-    /// to receive spawn/despawn callbacks.
+    /// Manages multiple pools by PoolObjectType.
     /// </summary>
-    public sealed class PoolManager : IPoolManager
+    public class PoolManager : IPoolManager
     {
-        private readonly Dictionary<int, object> _pools = new();
-        private readonly Dictionary<int, int> _instanceToPrefabId = new();
-        private readonly Transform _poolRoot;
-
-        private const int DefaultCapacity = 10;
-        private const int MaxPoolSize = 100;
-
-        public PoolManager()
+        private class Pool
         {
-            var rootGo = new GameObject("[PoolManager]");
-            Object.DontDestroyOnLoad(rootGo);
-            _poolRoot = rootGo.transform;
-
-            Debug.Log("[PoolManager] Initialized.");
+            public GameObject Prefab;
+            public Transform Parent;
+            public Queue<IPoolingObject> Available = new();
+            public List<IPoolingObject> All = new();
         }
 
-        public T Spawn<T>(T prefab, Vector3 position, Quaternion rotation) where T : Component, IPoolable
+        private readonly Dictionary<PoolObjectType, Pool> _pools = new();
+
+        public void InitializePool(PoolObjectType type, GameObject prefab, int initialCount, Transform parent)
         {
-            var pool = GetOrCreatePool(prefab);
-            var instance = pool.Get();
-
-            instance.transform.SetPositionAndRotation(position, rotation);
-            instance.gameObject.SetActive(true);
-            instance.OnSpawn();
-
-            return instance;
-        }
-
-        public void Despawn<T>(T instance) where T : Component, IPoolable
-        {
-            if (instance == null) return;
-
-            int instanceId = instance.GetInstanceID();
-
-            if (!_instanceToPrefabId.TryGetValue(instanceId, out int prefabId))
+            if (_pools.ContainsKey(type))
             {
-                Debug.LogWarning($"[PoolManager] Object not from pool: {instance.name}. Destroying.");
-                Object.Destroy(instance.gameObject);
+                Debug.LogWarning($"[PoolManager] Pool for {type} already exists.");
                 return;
             }
 
-            if (!_pools.TryGetValue(prefabId, out object poolObj))
+            var pool = new Pool
             {
-                Debug.LogWarning($"[PoolManager] Pool not found. Destroying object.");
-                Object.Destroy(instance.gameObject);
+                Prefab = prefab,
+                Parent = parent
+            };
+
+            _pools[type] = pool;
+
+            for (int i = 0; i < initialCount; i++)
+            {
+                CreateNew(type, pool);
+            }
+
+            Debug.Log($"[PoolManager] Initialized {type} pool with {initialCount} objects.");
+        }
+
+        public IPoolingObject Get(PoolObjectType type)
+        {
+            if (!_pools.TryGetValue(type, out var pool))
+            {
+                Debug.LogError($"[PoolManager] Pool for {type} not found.");
+                return null;
+            }
+
+            IPoolingObject poolObject;
+
+            if (pool.Available.Count > 0)
+            {
+                poolObject = pool.Available.Dequeue();
+            }
+            else
+            {
+                poolObject = CreateNew(type, pool);
+            }
+
+            poolObject.GameObject.SetActive(true);
+            return poolObject;
+        }
+
+        public void Return(IPoolingObject poolObject)
+        {
+            if (poolObject == null) return;
+
+            if (!_pools.TryGetValue(poolObject.Type, out var pool))
+            {
+                Debug.LogWarning($"[PoolManager] Pool for {poolObject.Type} not found.");
                 return;
             }
 
-            instance.OnDespawn();
-            instance.gameObject.SetActive(false);
+            ResetForPool(poolObject, pool);
 
-            var pool = (ObjectPool<T>)poolObj;
-            pool.Release(instance);
+            if (!pool.Available.Contains(poolObject))
+            {
+                pool.Available.Enqueue(poolObject);
+            }
         }
 
-        public void Prewarm<T>(T prefab, int count) where T : Component, IPoolable
+        public void Clear()
         {
-            var pool = GetOrCreatePool(prefab);
-            var instances = new List<T>(count);
-
-            for (int i = 0; i < count; i++)
+            foreach (var pool in _pools.Values)
             {
-                instances.Add(pool.Get());
-            }
-
-            foreach (var instance in instances)
-            {
-                instance.gameObject.SetActive(false);
-                pool.Release(instance);
-            }
-
-            Debug.Log($"[PoolManager] Prewarmed {count} instances of {prefab.name}");
-        }
-
-        public void ClearAll()
-        {
-            foreach (var poolObj in _pools.Values)
-            {
-                if (poolObj is System.IDisposable disposable)
+                foreach (var obj in pool.All)
                 {
-                    disposable.Dispose();
+                    if (obj.GameObject != null)
+                    {
+                        Object.Destroy(obj.GameObject);
+                    }
                 }
+
+                pool.Available.Clear();
+                pool.All.Clear();
             }
 
             _pools.Clear();
-            _instanceToPrefabId.Clear();
-
-            if (_poolRoot != null)
-            {
-                foreach (Transform child in _poolRoot)
-                {
-                    Object.Destroy(child.gameObject);
-                }
-            }
-
-            Debug.Log("[PoolManager] All pools cleared.");
+            Debug.Log("[PoolManager] Cleared all pools.");
         }
 
-        private ObjectPool<T> GetOrCreatePool<T>(T prefab) where T : Component, IPoolable
+        private IPoolingObject CreateNew(PoolObjectType type, Pool pool)
         {
-            int prefabId = prefab.GetInstanceID();
+            var go = Object.Instantiate(pool.Prefab, pool.Parent);
+            go.SetActive(false);
+            go.name = $"{type}_{pool.All.Count}";
 
-            if (_pools.TryGetValue(prefabId, out object existingPool))
-            {
-                return (ObjectPool<T>)existingPool;
-            }
+            var poolObject = new PoolingObject(type, go);
 
-            var container = new GameObject($"Pool_{prefab.name}");
-            container.transform.SetParent(_poolRoot);
+            pool.Available.Enqueue(poolObject);
+            pool.All.Add(poolObject);
 
-            var pool = new ObjectPool<T>(
-                createFunc: () => CreateInstance(prefab, container.transform),
-                actionOnGet: instance => { },
-                actionOnRelease: instance => { instance.transform.SetParent(container.transform); },
-                actionOnDestroy: instance => Object.Destroy(instance.gameObject),
-                collectionCheck: true,
-                defaultCapacity: DefaultCapacity,
-                maxSize: MaxPoolSize
-            );
-
-            _pools[prefabId] = pool;
-
-            Debug.Log($"[PoolManager] Created pool for: {prefab.name}");
-            return pool;
+            return poolObject;
         }
 
-        private T CreateInstance<T>(T prefab, Transform parent) where T : Component, IPoolable
+        private void ResetForPool(IPoolingObject poolObject, Pool pool)
         {
-            var instance = Object.Instantiate(prefab, parent);
-            instance.gameObject.SetActive(false);
-
-            int prefabId = prefab.GetInstanceID();
-            _instanceToPrefabId[instance.GetInstanceID()] = prefabId;
-
-            return instance;
+            if (poolObject.GameObject != null)
+            {
+                poolObject.GameObject.SetActive(false);
+                poolObject.GameObject.transform.localScale = Vector3.one;
+                poolObject.GameObject.transform.SetParent(pool.Parent);
+            }
         }
     }
 }

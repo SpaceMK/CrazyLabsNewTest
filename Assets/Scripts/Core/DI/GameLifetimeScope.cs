@@ -2,7 +2,6 @@ using SledSurfers.Core.Interfaces;
 using SledSurfers.Core.SceneManagement;
 using SledSurfers.Core.Services;
 using SledSurfers.Data.ScriptableObjects;
-using SledSurfers.Pooling;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -21,12 +20,10 @@ namespace SledSurfers.Core.DI
 
         protected override void Configure(IContainerBuilder builder)
         {
-            Debug.Log("[DI] Configuring RootLifetimeScope...");
+            Debug.Log("[DI] Configuring GameLifetimeScope...");
 
-           
             builder.RegisterInstance(_gameSettings);
 
-            // Core Services
             builder.Register<SceneLoaderService>(Lifetime.Singleton)
                 .As<ISceneLoader>();
 
@@ -39,7 +36,7 @@ namespace SledSurfers.Core.DI
             builder.Register<UpgradeService>(Lifetime.Singleton)
                 .As<IUpgradeService>();
 
-            
+            // Pool Manager - Singleton
             builder.Register<PoolManager>(Lifetime.Singleton)
                 .As<IPoolManager>();
 
