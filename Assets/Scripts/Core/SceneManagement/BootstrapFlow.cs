@@ -59,9 +59,13 @@ namespace SledSurfers.Core.SceneManagement
                 var progress = new Progress<float>(p => 
                     Debug.Log($"[Bootstrap] Loading gameplay scene: {p:P0}"));
                 
-                await _sceneLoader.LoadSceneAsync(_settings.GameplaySceneName, progress);
+                await _sceneLoader.LoadSceneAsync(_settings.GameplaySceneName);
                 
                 Debug.Log("[Bootstrap] Gameplay scene loaded successfully.");
+
+                await _sceneLoader.LoadSceneAdditiveAsync(_settings.UISceneName);
+
+                Debug.Log("[Bootstrap] UI scene loaded successfully.");
             }
             catch (Exception ex)
             {

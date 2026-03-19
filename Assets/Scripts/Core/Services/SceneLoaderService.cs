@@ -1,47 +1,77 @@
 using System;
-using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 using SledSurfers.Core.Interfaces;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SledSurfers.Core.Services
+namespace SledSurfers.Core.SceneManagement
 {
-    /// <summary>
-    /// Concrete scene loader using Unity's SceneManager.
-    /// Implements ISceneLoader - can be swapped for addressable-based loader later (OCP).
-    /// </summary>
-    public sealed class SceneLoaderService : ISceneLoader
+    public class SceneLoaderService : ISceneLoader
     {
-        public async UniTask LoadSceneAsync(string sceneName, IProgress<float> progress = null)
+        public const string BootstrapScene = "Bootstrap";
+        public const string MainMenuScene = "MainMenu";
+        public const string GameplayScene = "Gameplay";
+        public const string UIScene = "UI";
+
+        public event Action<string> OnSceneLoadStarted;
+        public event Action<string> OnSceneLoadCompleted;
+
+        public async Task LoadSceneAsync(string sceneName)
         {
+            OnSceneLoadStarted?.Invoke(sceneName);
+            Debug.Log($"[SceneLoader] Loading scene: {sceneName}");
+
             var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
-            
-            if (operation == null)
+
+            while (!operation.isDone)
             {
-                throw new InvalidOperationException($"Failed to start loading scene: {sceneName}");
+                await Task.Yield();
             }
 
-            operation.allowSceneActivation = false;
-
-            while (operation.progress < 0.9f)
-            {
-                progress?.Report(operation.progress / 0.9f);
-                await UniTask.Yield();
-            }
-
-            progress?.Report(1f);
-            operation.allowSceneActivation = true;
-
-            await UniTask.WaitUntil(() => operation.isDone);
+            OnSceneLoadCompleted?.Invoke(sceneName);
+            Debug.Log($"[SceneLoader] Scene loaded: {sceneName}");
         }
 
-        public async UniTask UnloadSceneAsync(string sceneName)
+        public async Task LoadSceneAdditiveAsync(string sceneName)
         {
-            var operation = SceneManager.UnloadSceneAsync(sceneName);
-            
-            if (operation != null)
+            OnSceneLoadStarted?.Invoke(sceneName);
+            Debug.Log($"[SceneLoader] Loading scene additive: {sceneName}");
+
+            var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+
+            while (!operation.isDone)
             {
-                await UniTask.WaitUntil(() => operation.isDone);
+                await Task.Yield();
             }
+
+            OnSceneLoadCompleted?.Invoke(sceneName);
+            Debug.Log($"[SceneLoader] Scene loaded additive: {sceneName}");
+        }
+
+        public async Task UnloadSceneAsync(string sceneName)
+        {
+            Debug.Log($"[SceneLoader] Unloading scene: {sceneName}");
+
+            var operation = SceneManager.UnloadSceneAsync(sceneName);
+
+            if (operation == null)
+            {
+                Debug.LogWarning($"[SceneLoader] Scene not loaded: {sceneName}");
+                return;
+            }
+
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
+
+            Debug.Log($"[SceneLoader] Scene unloaded: {sceneName}");
+        }
+
+        public async Task LoadGameplayWithUI()
+        {
+            await LoadSceneAsync(GameplayScene);
+            await LoadSceneAdditiveAsync(UIScene);
         }
     }
 }

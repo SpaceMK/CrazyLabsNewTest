@@ -2,6 +2,8 @@ using SledSurfers.Core.Interfaces;
 using SledSurfers.Core.SceneManagement;
 using SledSurfers.Core.Services;
 using SledSurfers.Data.ScriptableObjects;
+using SledSurfers.UI.Interfaces;
+using SledSurfers.UI.Services;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -36,9 +38,13 @@ namespace SledSurfers.Core.DI
             builder.Register<UpgradeService>(Lifetime.Singleton)
                 .As<IUpgradeService>();
 
-            // Pool Manager - Singleton
             builder.Register<PoolManager>(Lifetime.Singleton)
                 .As<IPoolManager>();
+
+            // UI Service - singleton for cross-scene communication
+            builder.Register<UIService>(Lifetime.Singleton)
+                .As<IUIService>()
+                .AsSelf();
 
             builder.RegisterEntryPoint<BootstrapFlow>();
         }

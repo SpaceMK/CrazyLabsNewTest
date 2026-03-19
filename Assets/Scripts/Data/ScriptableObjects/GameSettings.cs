@@ -12,6 +12,7 @@ namespace SledSurfers.Data.ScriptableObjects
         [Header("Scene Names")]
         public string BootstrapSceneName = "Bootstrap";
         public string GameplaySceneName = "Gameplay";
+        public string UISceneName = "UI";
 
         [Header("Launch Settings")]
         public float BaseLaunchForce = 15f;

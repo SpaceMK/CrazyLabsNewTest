@@ -1,0 +1,82 @@
+using SledSurfers.UI.Services;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using VContainer;
+
+namespace SledSurfers.UI.Screens
+{
+    /// <summary>
+    /// Game over screen with results and play again button.
+    /// </summary>
+    public class GameOverScreen : MonoBehaviour
+    {
+        [SerializeField] private GameObject _root;
+        [SerializeField] private TextMeshProUGUI _distanceText;
+        [SerializeField] private TextMeshProUGUI _coinsText;
+        [SerializeField] private Button _playAgainButton;
+        [SerializeField] private Button _mainMenuButton;
+
+        private UIService _uiService;
+
+        [Inject]
+        public void Construct(UIService uiService)
+        {
+            _uiService = uiService;
+            Subscribe();
+        }
+
+        private void OnDestroy()
+        {
+            Unsubscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (_uiService == null) return;
+
+            _uiService.OnShowGameOver += Show;
+            _uiService.OnShowHUD += Hide;
+            _uiService.OnShowStartMenu += Hide;
+            _uiService.OnHideAll += Hide;
+
+            _playAgainButton.onClick.AddListener(OnPlayAgainClicked);
+            _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+        }
+
+        private void Unsubscribe()
+        {
+            if (_uiService == null) return;
+
+            _uiService.OnShowGameOver -= Show;
+            _uiService.OnShowHUD -= Hide;
+            _uiService.OnShowStartMenu -= Hide;
+            _uiService.OnHideAll -= Hide;
+
+            _playAgainButton.onClick.RemoveListener(OnPlayAgainClicked);
+            _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
+        }
+
+        public void Show(float distance, int coins)
+        {
+            _root.SetActive(true);
+            _distanceText.text = $"{distance:F0}m";
+            _coinsText.text = coins.ToString();
+        }
+
+        public void Hide()
+        {
+            _root.SetActive(false);
+        }
+
+        private void OnPlayAgainClicked()
+        {
+            _uiService.TriggerPlay();
+        }
+
+        private void OnMainMenuClicked()
+        {
+            _uiService.TriggerMainMenu();
+        }
+    }
+}
