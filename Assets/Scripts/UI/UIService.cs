@@ -84,15 +84,5 @@ namespace SledSurfers.UI.Services
         {
             OnMainMenuClicked?.Invoke();
         }
-
-        public void TriggerPause()
-        {
-            OnPauseClicked?.Invoke();
-        }
-
-        public void TriggerResume()
-        {
-            OnResumeClicked?.Invoke();
-        }
     }
 }
