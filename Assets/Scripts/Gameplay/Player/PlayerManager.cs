@@ -1,5 +1,4 @@
 using SledSurfers.Core.Interfaces;
-using SledSurfers.Core.Services;
 using SledSurfers.Data.ScriptableObjects;
 using SledSurfers.Gameplay.Level;
 using SledSurfers.Gameplay.Slingshot;
@@ -27,6 +26,8 @@ namespace SledSurfers.Gameplay.Player
         private CoinLevelManager _coinLevelManager;
         private MomentumTracker _momentumTracker;
 
+        private bool _isInitialized;
+
         // Expose interfaces for external consumers
         public IPlayerMotor Motor => _motor;
         public ICollisionHandler CollisionHandler => _collisionHandler;
@@ -39,37 +40,59 @@ namespace SledSurfers.Gameplay.Player
 
         public void Initialize(GameSettings settings, Data.Models.PlayerData playerData, IInputHandler input)
         {
-            _rigidbody = GetComponent<Rigidbody>();
-            _collisionHandler = GetComponent<PlayerCollisionHandler>();
-            _physicsController = GetComponent<PlayerPhysicsController>();
-            _coinLevelManager = FindFirstObjectByType<CoinLevelManager>();
+            // Get components (always needed)
+            if (_rigidbody == null)
+                _rigidbody = GetComponent<Rigidbody>();
+            if (_collisionHandler == null)
+                _collisionHandler = GetComponent<PlayerCollisionHandler>();
+            if (_physicsController == null)
+                _physicsController = GetComponent<PlayerPhysicsController>();
+            if (_coinLevelManager == null)
+                _coinLevelManager = FindFirstObjectByType<CoinLevelManager>();
+
             // Configure rigidbody defaults
             _rigidbody.isKinematic = true;
             _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 
-            // Create motor first (other systems depend on it)
-            _motor = new PlayerMotor(
-                _rigidbody,
-                settings,
-                playerData.MaxSpeedLevel,
-                playerData.SteeringLevel
-            );
+            // First time initialization - create subsystems
+            if (!_isInitialized)
+            {
+                // Create motor first (other systems depend on it)
+                _motor = new PlayerMotor(
+                    _rigidbody,
+                    settings,
+                    playerData.MaxSpeedLevel,
+                    playerData.SteeringLevel
+                );
 
-            // Create slingshot
-            _slingshot = new SlingshotController(settings, playerData.LaunchPowerLevel);
+                // Create slingshot
+                _slingshot = new SlingshotController(settings, playerData.LaunchPowerLevel);
 
-            // Create momentum tracker - subscribes to motor events internally
-            _momentumTracker = new MomentumTracker(_motor);
+                // Create momentum tracker - subscribes to motor events internally
+                _momentumTracker = new MomentumTracker(_motor);
 
-            // Initialize physics controller - subscribes to motor events internally
-            _physicsController.Initialize(_motor, input);
-            _collisionHandler.Initialize(_coinLevelManager);
+                // Initialize physics controller - subscribes to motor events internally
+                _physicsController.Initialize(_motor, input);
+                _collisionHandler.Initialize(_coinLevelManager);
 
-            Debug.Log($"[PlayerManager] Initialized " +
-                      $"(Speed Lv{playerData.MaxSpeedLevel}, Steering Lv{playerData.SteeringLevel}, " +
-                      $"Launch Lv{playerData.LaunchPowerLevel})");
+                _isInitialized = true;
+
+                Debug.Log($"[PlayerManager] Initialized " +
+                          $"(Speed Lv{playerData.MaxSpeedLevel}, Steering Lv{playerData.SteeringLevel}, " +
+                          $"Launch Lv{playerData.LaunchPowerLevel})");
+            }
+            else
+            {
+                // Subsequent calls - update existing subsystems with new stats
+                _motor.UpdateStats(settings, playerData.MaxSpeedLevel, playerData.SteeringLevel);
+                _slingshot.UpdateStats(settings, playerData.LaunchPowerLevel);
+
+                Debug.Log($"[PlayerManager] Updated stats " +
+                          $"(Speed Lv{playerData.MaxSpeedLevel}, Steering Lv{playerData.SteeringLevel}, " +
+                          $"Launch Lv{playerData.LaunchPowerLevel})");
+            }
         }
 
         private void Start()
@@ -77,10 +100,9 @@ namespace SledSurfers.Gameplay.Player
             _startingPosition = transform.position;
         }
 
-
         public void CalculateDistance()
         {
-           FinalDistance = Vector3.Distance(_startingPosition,transform.position); 
+            FinalDistance = Vector3.Distance(_startingPosition, transform.position);
         }
 
         public void ResetPlayer(Vector3 startPosition)
@@ -97,7 +119,7 @@ namespace SledSurfers.Gameplay.Player
         private void OnDestroy()
         {
             // Cleanup subscriptions
-            (_momentumTracker as MomentumTracker)?.Dispose();
+            _momentumTracker?.Dispose();
         }
     }
 }
