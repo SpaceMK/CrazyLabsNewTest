@@ -60,8 +60,8 @@ namespace SledSurfers.UI.Screens
         public void Show(float distance, int coins)
         {
             _root.SetActive(true);
-            _distanceText.text = $"{distance:F0}m";
-            _coinsText.text = coins.ToString();
+            _distanceText.text = $"Distance: {distance:F0}m";
+            _coinsText.text = $"Coins: {coins}";
         }
 
         public void Hide()

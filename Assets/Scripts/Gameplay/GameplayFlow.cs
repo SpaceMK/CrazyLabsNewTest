@@ -3,18 +3,15 @@ using SledSurfers.Data.Models;
 using SledSurfers.Data.ScriptableObjects;
 using SledSurfers.Gameplay.Level;
 using SledSurfers.Gameplay.Player;
+using SledSurfers.UI.Services;
 using UnityEngine;
 using VContainer.Unity;
 
 namespace SledSurfers.Gameplay
 {
     /// <summary>
-    /// Orchestrates the gameplay loop:
-    ///   1. Wait for launch input
-    ///   2. Charge slingshot
-    ///   3. Release → player travels downhill
-    ///   4. Player steers left/right
-    ///   5. Run ends on crash or momentum loss
+    /// Orchestrates the gameplay loop.
+    /// Flow: StartMenu → Play Click → WaitingToLaunch → Charging → Running → Ended → GameOver UI → Play Click → repeat
     /// </summary>
     public sealed class GameplayFlow : IStartable, ITickable
     {
@@ -24,15 +21,16 @@ namespace SledSurfers.Gameplay
         private readonly GameSettings _settings;
         private readonly PlayerManager _player;
         private readonly CoinLevelManager _coinLevelManager;
-       //private readonly ObstacleLevelManager _obstacleLevelManager;
+        private readonly UIService _uiService;
 
         private PlayerData _playerData;
         private Vector3 _startPosition;
         private int _coinsCollected;
-        private RunPhase _currentPhase = RunPhase.WaitingToLaunch;
+        private RunPhase _currentPhase = RunPhase.StartMenu;
 
         private enum RunPhase
         {
+            StartMenu,
             WaitingToLaunch,
             Charging,
             Running,
@@ -45,8 +43,8 @@ namespace SledSurfers.Gameplay
             IPlayerDataService playerDataService,
             GameSettings settings,
             PlayerManager player,
-            CoinLevelManager coinLevelManager)
-           
+            CoinLevelManager coinLevelManager,
+            UIService uiService)
         {
             _input = input;
             _gameState = gameState;
@@ -54,7 +52,7 @@ namespace SledSurfers.Gameplay
             _settings = settings;
             _player = player;
             _coinLevelManager = coinLevelManager;
-           
+            _uiService = uiService;
         }
 
         public void Start()
@@ -65,29 +63,31 @@ namespace SledSurfers.Gameplay
             // Initialize player
             _player.Initialize(_settings, _playerData, _input);
 
-            // Subscribe to events
+            // Subscribe to player events
             _player.CollisionHandler.OnCrash += HandleCrash;
             _player.CollisionHandler.OnCoinCollected += HandleCoinCollected;
             _player.MomentumTracker.OnMomentumLost += HandleMomentumLost;
 
-            // Enable input
-            _input.Enable();
-            _currentPhase = RunPhase.WaitingToLaunch;
+            // Subscribe to UI events
+            _uiService.OnPlayClicked += HandlePlayClicked;
+            _uiService.OnMainMenuClicked += HandleMainMenu;
 
-            Debug.Log("[GameplayFlow] Ready. Press Space/Tap to launch.");
+            // Start with input disabled, show start menu
+            _input.Disable();
+            _currentPhase = RunPhase.StartMenu;
+            _uiService.ShowStartMenu();
+
+            Debug.Log("[GameplayFlow] Ready. Showing start menu.");
         }
 
         public void Tick()
         {
-            // Debug restart
-            if (UnityEngine.Input.GetKeyDown(KeyCode.R))
-            {
-                Retry();
-                return;
-            }
-
             switch (_currentPhase)
             {
+                case RunPhase.StartMenu:
+                    // Waiting for Play button click
+                    break;
+
                 case RunPhase.WaitingToLaunch:
                     TickWaitingToLaunch();
                     break;
@@ -97,9 +97,37 @@ namespace SledSurfers.Gameplay
                     break;
 
                 case RunPhase.Running:
+                    TickRunning();
+                    break;
+
                 case RunPhase.Ended:
+                    // Waiting for Play Again button click
                     break;
             }
+        }
+
+        private void HandlePlayClicked()
+        {
+            if (_currentPhase == RunPhase.StartMenu)
+            {
+                // First time playing
+                StartGame();
+            }
+            else if (_currentPhase == RunPhase.Ended)
+            {
+                // Play again after game over
+                Retry();
+            }
+        }
+
+        private void StartGame()
+        {
+            _input.Enable();
+            _coinsCollected = 0;
+            _currentPhase = RunPhase.WaitingToLaunch;
+            _uiService.ShowHUD();
+
+            Debug.Log("[GameplayFlow] Game started. Press to launch.");
         }
 
         private void TickWaitingToLaunch()
@@ -122,10 +150,16 @@ namespace SledSurfers.Gameplay
                 _player.Motor.Launch(force);
                 _player.MomentumTracker.StartTracking();
 
-                _coinsCollected = 0;
                 _currentPhase = RunPhase.Running;
                 Debug.Log("[GameplayFlow] Launched!");
             }
+        }
+
+        private void TickRunning()
+        {
+            // Update UI with current distance
+            _player.CalculateDistance();
+            _uiService.UpdateDistance(_player.FinalDistance);
         }
 
         private void HandleCrash()
@@ -151,6 +185,7 @@ namespace SledSurfers.Gameplay
             int value = _settings.BaseCoinValue + _settings.CoinValuePerLevel * (_playerData.CoinValueLevel - 1);
             _coinsCollected += amount * value;
 
+            _uiService.UpdateCoins(_coinsCollected);
             Debug.Log($"[GameplayFlow] Coin collected! Total: {_coinsCollected}");
         }
 
@@ -161,34 +196,42 @@ namespace SledSurfers.Gameplay
             _player.Motor.Halt();
             _player.MomentumTracker.StopTracking();
 
-            // Calculate distance
+            // Calculate final distance
+            _player.CalculateDistance();
             float distance = _player.FinalDistance;
 
             // Save coins
             _playerData.Coins += _coinsCollected;
             _playerDataService.Save(_playerData);
 
-            _gameState.TransitionTo(GameState.GameOver);
+            // Show game over UI
+            _uiService.ShowGameOver(distance, _coinsCollected);
 
+            _gameState.TransitionTo(GameState.GameOver);
             Debug.Log($"[GameplayFlow] Run ended. Distance: {distance:F1}m, Coins: {_coinsCollected}");
         }
 
-        /// <summary>
-        /// Call to restart the run.
-        /// </summary>
-        public void Retry()
+        private void HandleMainMenu()
+        {
+            Debug.Log("[GameplayFlow] Main menu requested.");
+            // TODO: Load main menu scene
+        }
+
+        private void Retry()
         {
             // Reset player
             _player.ResetPlayer(_startPosition);
 
             // Reset level objects
             _coinLevelManager.Reset();
-            //_obstacleLevelManager.Reset();
 
             // Reset state
             _coinsCollected = 0;
             _currentPhase = RunPhase.WaitingToLaunch;
             _input.Enable();
+
+            // Show HUD
+            _uiService.ShowHUD();
 
             Debug.Log("[GameplayFlow] Retry - ready to launch.");
         }
