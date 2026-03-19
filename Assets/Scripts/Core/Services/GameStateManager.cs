@@ -1,54 +1,27 @@
-using System;
+﻿using System;
 using SledSurfers.Core.Interfaces;
 using UnityEngine;
 
 namespace SledSurfers.Core.Services
 {
-    /// <summary>
-    /// Manages game state transitions with validation.
-    /// SRP - only manages state, delegates scene loading and UI to listeners.
-    /// </summary>
-    public sealed class GameStateManager : IGameStateManager
+    public class GameStateManager : IGameStateManager
     {
-        public GameState CurrentState { get; private set; } = GameState.Bootstrap;
-        
-        public event Action<GameState, GameState> OnStateChanged;
+        public GameState CurrentState { get; private set; } = GameState.None;
+        public GameStateData CurrentData { get; private set; }
 
-        public void TransitionTo(GameState newState)
+        public event Action<GameState, GameState, GameStateData> OnStateChanged;
+
+        public void TransitionTo(GameState newState, GameStateData data = null)
         {
-            if (CurrentState == newState)
-            {
-                Debug.LogWarning($"[GameState] Already in state {newState}, ignoring transition.");
-                return;
-            }
+            if (CurrentState == newState) return;
 
-            var previousState = CurrentState;
-            
-            if (!IsValidTransition(previousState, newState))
-            {
-                Debug.LogError($"[GameState] Invalid transition: {previousState} -> {newState}");
-                return;
-            }
-
-            Debug.Log($"[GameState] {previousState} -> {newState}");
+            var oldState = CurrentState;
             CurrentState = newState;
-            OnStateChanged?.Invoke(previousState, newState);
-        }
+            CurrentData = data;
 
-        private bool IsValidTransition(GameState from, GameState to)
-        {
-            return (from, to) switch
-            {
-                (GameState.Bootstrap, GameState.Gameplay) => true,
-                (GameState.Bootstrap, GameState.MainMenu) => true,
-                (GameState.MainMenu, GameState.Gameplay) => true,
-                (GameState.Gameplay, GameState.GameOver) => true,
-                (GameState.GameOver, GameState.Upgrade) => true,
-                (GameState.GameOver, GameState.Gameplay) => true,
-                (GameState.Upgrade, GameState.Gameplay) => true,
-                (GameState.Upgrade, GameState.MainMenu) => true,
-                _ => false
-            };
+            Debug.Log($"[GameState] {oldState} → {newState}");
+
+            OnStateChanged?.Invoke(oldState, newState, data);
         }
     }
 }

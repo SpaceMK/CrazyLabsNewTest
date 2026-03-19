@@ -53,7 +53,7 @@ namespace SledSurfers.Core.SceneManagement
                 // Future: await _analyticsService.InitializeAsync();
 
                 // Step 3: Transition state
-                _gameStateManager.TransitionTo(GameState.Gameplay);
+                _gameStateManager.TransitionTo(GameState.StartMenu);
 
                 // Step 4: Load gameplay scene
                 var progress = new Progress<float>(p => 

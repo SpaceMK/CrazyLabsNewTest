@@ -8,6 +8,7 @@ namespace SledSurfers.UI.Screens
 {
     /// <summary>
     /// Game over screen with results and play again button.
+    /// Listens to UIService events driven by GameState.
     /// </summary>
     public class GameOverScreen : MonoBehaviour
     {
@@ -38,7 +39,6 @@ namespace SledSurfers.UI.Screens
             _uiService.OnShowGameOver += Show;
             _uiService.OnShowHUD += Hide;
             _uiService.OnShowStartMenu += Hide;
-            _uiService.OnHideAll += Hide;
 
             _playAgainButton.onClick.AddListener(OnPlayAgainClicked);
             _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
@@ -51,7 +51,6 @@ namespace SledSurfers.UI.Screens
             _uiService.OnShowGameOver -= Show;
             _uiService.OnShowHUD -= Hide;
             _uiService.OnShowStartMenu -= Hide;
-            _uiService.OnHideAll -= Hide;
 
             _playAgainButton.onClick.RemoveListener(OnPlayAgainClicked);
             _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
@@ -60,8 +59,8 @@ namespace SledSurfers.UI.Screens
         public void Show(float distance, int coins)
         {
             _root.SetActive(true);
-            _distanceText.text = $"Distance: {distance:F0}m";
-            _coinsText.text = $"Coins: {coins}";
+            _distanceText.text = $"{distance:F0}m";
+            _coinsText.text = coins.ToString();
         }
 
         public void Hide()

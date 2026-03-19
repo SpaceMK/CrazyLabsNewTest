@@ -1,39 +1,67 @@
-using System;
+﻿using System;
+using SledSurfers.Core.Interfaces;
 using SledSurfers.UI.Interfaces;
+using UnityEngine;
 
 namespace SledSurfers.UI.Services
 {
     /// <summary>
     /// Service for cross-scene UI communication.
-    /// Registered in GameLifetimeScope (singleton).
+    /// Listens to GameStateManager and broadcasts UI events.
     /// </summary>
-    public class UIService : IUIService
+    public class UIService : IUIService, IDisposable
     {
+        private readonly IGameStateManager _gameState;
+
         // Events from UI to Gameplay
         public event Action OnPlayClicked;
         public event Action OnMainMenuClicked;
+        public event Action OnPauseClicked;
+        public event Action OnResumeClicked;
 
-        // Events from Service to UI Screens
+        // Events to UI Screens (driven by GameState)
         public event Action OnShowStartMenu;
         public event Action OnShowHUD;
         public event Action<float, int> OnShowGameOver;
+        public event Action OnShowPause;
         public event Action<int> OnCoinsUpdated;
         public event Action<float> OnDistanceUpdated;
-        public event Action OnHideAll;
 
-        public void ShowStartMenu()
+        public UIService(IGameStateManager gameState)
         {
-            OnShowStartMenu?.Invoke();
+            _gameState = gameState;
+            _gameState.OnStateChanged += HandleStateChanged;
         }
 
-        public void ShowHUD()
+        public void Dispose()
         {
-            OnShowHUD?.Invoke();
+            _gameState.OnStateChanged -= HandleStateChanged;
         }
 
-        public void ShowGameOver(float distance, int coinsCollected)
+        private void HandleStateChanged(GameState oldState, GameState newState, GameStateData data)
         {
-            OnShowGameOver?.Invoke(distance, coinsCollected);
+            Debug.Log($"[UIService] State changed: {oldState} → {newState}");
+
+            switch (newState)
+            {
+                case GameState.StartMenu:
+                    OnShowStartMenu?.Invoke();
+                    break;
+
+                case GameState.Playing:
+                    OnShowHUD?.Invoke();
+                    break;
+
+                case GameState.Paused:
+                    OnShowPause?.Invoke();
+                    break;
+
+                case GameState.GameOver:
+                    float distance = data?.Distance ?? 0f;
+                    int coins = data?.CoinsCollected ?? 0;
+                    OnShowGameOver?.Invoke(distance, coins);
+                    break;
+            }
         }
 
         public void UpdateCoins(int coins)
@@ -46,11 +74,6 @@ namespace SledSurfers.UI.Services
             OnDistanceUpdated?.Invoke(distance);
         }
 
-        public void HideAll()
-        {
-            OnHideAll?.Invoke();
-        }
-
         // Called by UI buttons
         public void TriggerPlay()
         {
@@ -60,6 +83,16 @@ namespace SledSurfers.UI.Services
         public void TriggerMainMenu()
         {
             OnMainMenuClicked?.Invoke();
+        }
+
+        public void TriggerPause()
+        {
+            OnPauseClicked?.Invoke();
+        }
+
+        public void TriggerResume()
+        {
+            OnResumeClicked?.Invoke();
         }
     }
 }

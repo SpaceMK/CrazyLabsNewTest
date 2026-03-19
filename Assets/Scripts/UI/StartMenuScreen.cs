@@ -7,7 +7,7 @@ namespace SledSurfers.UI.Screens
 {
     /// <summary>
     /// Start menu with Play button.
-    /// Shown when game loads.
+    /// Listens to UIService events driven by GameState.
     /// </summary>
     public class StartMenuScreen : MonoBehaviour
     {
@@ -34,7 +34,7 @@ namespace SledSurfers.UI.Screens
 
             _uiService.OnShowStartMenu += Show;
             _uiService.OnShowHUD += Hide;
-            _uiService.OnHideAll += Hide;
+            _uiService.OnShowGameOver += OnGameOver;
 
             _playButton.onClick.AddListener(OnPlayClicked);
         }
@@ -45,7 +45,7 @@ namespace SledSurfers.UI.Screens
 
             _uiService.OnShowStartMenu -= Show;
             _uiService.OnShowHUD -= Hide;
-            _uiService.OnHideAll -= Hide;
+            _uiService.OnShowGameOver -= OnGameOver;
 
             _playButton.onClick.RemoveListener(OnPlayClicked);
         }
@@ -58,6 +58,11 @@ namespace SledSurfers.UI.Screens
         public void Hide()
         {
             _root.SetActive(false);
+        }
+
+        private void OnGameOver(float distance, int coins)
+        {
+            Hide();
         }
 
         private void OnPlayClicked()

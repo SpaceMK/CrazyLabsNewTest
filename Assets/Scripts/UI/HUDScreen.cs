@@ -7,6 +7,7 @@ namespace SledSurfers.UI.Screens
 {
     /// <summary>
     /// In-game HUD showing coins and distance.
+    /// Listens to UIService events driven by GameState.
     /// </summary>
     public class HUDScreen : MonoBehaviour
     {
@@ -35,7 +36,6 @@ namespace SledSurfers.UI.Screens
             _uiService.OnShowHUD += Show;
             _uiService.OnShowStartMenu += Hide;
             _uiService.OnShowGameOver += OnGameOver;
-            _uiService.OnHideAll += Hide;
             _uiService.OnCoinsUpdated += UpdateCoins;
             _uiService.OnDistanceUpdated += UpdateDistance;
         }
@@ -47,7 +47,6 @@ namespace SledSurfers.UI.Screens
             _uiService.OnShowHUD -= Show;
             _uiService.OnShowStartMenu -= Hide;
             _uiService.OnShowGameOver -= OnGameOver;
-            _uiService.OnHideAll -= Hide;
             _uiService.OnCoinsUpdated -= UpdateCoins;
             _uiService.OnDistanceUpdated -= UpdateDistance;
         }

@@ -26,13 +26,10 @@ namespace SledSurfers.Core.DI
 
             builder.RegisterInstance(_gameSettings);
 
-            builder.Register<UIService>(Lifetime.Singleton)
-               .As<IUIService>()
-               .AsSelf();
-
             builder.Register<SceneLoaderService>(Lifetime.Singleton)
                 .As<ISceneLoader>();
 
+            // GameStateManager must be registered before UIService
             builder.Register<GameStateManager>(Lifetime.Singleton)
                 .As<IGameStateManager>();
 
@@ -45,8 +42,10 @@ namespace SledSurfers.Core.DI
             builder.Register<PoolManager>(Lifetime.Singleton)
                 .As<IPoolManager>();
 
-            // UI Service - singleton for cross-scene communication
-           
+            // UIService - listens to GameStateManager
+            builder.Register<UIService>(Lifetime.Singleton)
+                .As<IUIService>()
+                .AsSelf();
 
             builder.RegisterEntryPoint<BootstrapFlow>();
         }

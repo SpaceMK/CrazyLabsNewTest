@@ -1,3 +1,4 @@
+using SledSurfers.Core.DI;
 using SledSurfers.UI.Screens;
 using UnityEngine;
 using VContainer;

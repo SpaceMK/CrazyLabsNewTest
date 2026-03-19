@@ -10,7 +10,7 @@ namespace SledSurfers.Core.DI
 {
     /// <summary>
     /// Lifetime scope for Gameplay scene.
-    /// Child of GameLifetimeScope - inherits PoolManager, UIService, etc.
+    /// Child of GameLifetimeScope - inherits PoolManager, UIService, GameStateManager, etc.
     /// </summary>
     public sealed class GameplayLifetimeScope : LifetimeScope
     {

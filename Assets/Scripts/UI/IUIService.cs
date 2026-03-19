@@ -7,13 +7,11 @@ namespace SledSurfers.UI.Interfaces
         // Events from UI to Gameplay
         event Action OnPlayClicked;
         event Action OnMainMenuClicked;
+        event Action OnPauseClicked;
+        event Action OnResumeClicked;
 
-        // Methods called by Gameplay to update UI
-        void ShowStartMenu();
-        void ShowHUD();
-        void ShowGameOver(float distance, int coinsCollected);
+        // Runtime data updates
         void UpdateCoins(int coins);
         void UpdateDistance(float distance);
-        void HideAll();
     }
 }

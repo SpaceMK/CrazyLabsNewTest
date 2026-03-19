@@ -1,23 +1,30 @@
+using System;
+
 namespace SledSurfers.Core.Interfaces
 {
-    /// <summary>
-    /// Manages high-level game state transitions.
-    /// SRP - only responsible for state, not scene loading or UI.
-    /// </summary>
+    public enum GameState
+    {
+        None,
+        Loading,
+        StartMenu,
+        Playing,
+        Paused,
+        GameOver
+    }
+
     public interface IGameStateManager
     {
         GameState CurrentState { get; }
-        void TransitionTo(GameState newState);
-        
-        event System.Action<GameState, GameState> OnStateChanged;
+        GameStateData CurrentData { get; }
+
+        void TransitionTo(GameState newState, GameStateData data = null);
+
+        event Action<GameState, GameState, GameStateData> OnStateChanged;
     }
 
-    public enum GameState
+    public class GameStateData
     {
-        Bootstrap,
-        MainMenu,
-        Gameplay,
-        GameOver,
-        Upgrade
+        public float Distance { get; set; }
+        public int CoinsCollected { get; set; }
     }
 }
