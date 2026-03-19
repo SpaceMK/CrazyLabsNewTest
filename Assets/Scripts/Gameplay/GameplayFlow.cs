@@ -9,11 +9,8 @@ using VContainer.Unity;
 
 namespace SledSurfers.Gameplay
 {
-    /// <summary>
-    /// Orchestrates the gameplay loop.
-    /// Decoupled from UI - communicates only via IGameStateManager and IUIService events.
-    /// </summary>
-    public sealed class GameplayFlow : IStartable, ITickable
+    
+    public  class GameplayFlow : IStartable, ITickable
     {
         private readonly IInputHandler _input;
         private readonly IGameStateManager _gameState;
@@ -87,15 +84,12 @@ namespace SledSurfers.Gameplay
 
         public void Tick()
         {
-            Debug.Log($"[GameplayFlow] Current phase: {_currentPhase}");
             switch (_currentPhase)
             {
                 case RunPhase.StartMenu:
                 case RunPhase.Upgrades:
-                    break;
-
                 case RunPhase.Ended:
-                   
+                    // Waiting for UI button clicks
                     break;
 
                 case RunPhase.WaitingToLaunch:
@@ -247,7 +241,21 @@ namespace SledSurfers.Gameplay
 
         private void HandleMainMenu()
         {
-            Debug.Log("[GameplayFlow] Main menu requested.");
+            // Reset player position
+            _player.ResetPlayer(_startPosition);
+
+            // Reset level objects
+            _coinLevelManager.Reset();
+
+            // Reset state
+            _coinsCollected = 0;
+            _currentPhase = RunPhase.StartMenu;
+            _input.Disable();
+
+            // Transition to StartMenu
+            _gameState.TransitionTo(GameState.StartMenu);
+
+            Debug.Log("[GameplayFlow] Returned to main menu.");
         }
 
         private void Retry()
