@@ -1,24 +1,22 @@
+using System.Collections.Generic;
 using SledSurfers.Data.Models;
+using SledSurfers.Data.Upgrades;
 
 namespace SledSurfers.Core.Interfaces
 {
     /// <summary>
     /// Handles upgrade logic and cost calculations.
-    /// ISP - separated from IPlayerDataService since upgrade rules != persistence.
     /// </summary>
     public interface IUpgradeService
     {
-        bool CanAffordUpgrade(UpgradeType type, PlayerData data);
-        PlayerData ApplyUpgrade(UpgradeType type, PlayerData data);
-        int GetUpgradeCost(UpgradeType type, int currentLevel);
-        float GetUpgradeValue(UpgradeType type, int level);
-    }
+        IReadOnlyList<UpgradeDefinition> GetAllUpgrades();
+        UpgradeDefinition GetUpgrade(UpgradeStatType type);
 
-    public enum UpgradeType
-    {
-        LaunchPower,
-        MaxSpeed,
-        SteeringResponsiveness,
-        CoinValue
+        int GetCurrentLevel(UpgradeStatType type, PlayerData data);
+        bool CanAffordUpgrade(UpgradeStatType type, PlayerData data);
+        PlayerData ApplyUpgrade(UpgradeStatType type, PlayerData data);
+
+        int GetUpgradeCost(UpgradeStatType type, int currentLevel);
+        float GetUpgradeValue(UpgradeStatType type, int level);
     }
 }

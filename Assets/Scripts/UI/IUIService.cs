@@ -7,8 +7,8 @@ namespace SledSurfers.UI.Interfaces
         // Events from UI to Gameplay
         event Action OnPlayClicked;
         event Action OnMainMenuClicked;
-        event Action OnPauseClicked;
-        event Action OnResumeClicked;
+        event Action OnUpgradesClicked;
+        event Action OnCloseUpgradesClicked;
 
         // Runtime data updates
         void UpdateCoins(int coins);

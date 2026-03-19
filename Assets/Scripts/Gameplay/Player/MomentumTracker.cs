@@ -42,17 +42,15 @@ namespace SledSurfers.Gameplay.Player
 
         private void HandleSpeedChanged(float speed)
         {
+            Debug.Log("[MomentumTracker] {}.");
             if (!_isTracking) return;
 
             if (speed <= 0.1f) // Effectively stopped
             {
-                if (!_isStopped)
-                {
-                    // Just stopped - record the time
                     _isStopped = true;
                     OnMomentumLost?.Invoke();
                     StopTracking();
-                }
+                
             }
         }
 

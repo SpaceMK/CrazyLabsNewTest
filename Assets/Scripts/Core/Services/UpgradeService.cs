@@ -1,42 +1,75 @@
+using System.Collections.Generic;
 using SledSurfers.Core.Interfaces;
 using SledSurfers.Data.Models;
-using SledSurfers.Data.ScriptableObjects;
+using SledSurfers.Data.Upgrades;
 using UnityEngine;
 
 namespace SledSurfers.Core.Services
 {
     /// <summary>
     /// Calculates upgrade costs and applies upgrades to player data.
-    /// Depends on GameSettings (injected) for tuning values - DIP.
+    /// Uses IUpgradeConfigProvider for configuration.
     /// </summary>
     public sealed class UpgradeService : IUpgradeService
     {
-        private readonly GameSettings _settings;
+        private readonly IUpgradeConfigProvider _configProvider;
 
-        public UpgradeService(GameSettings settings)
+        public UpgradeService(IUpgradeConfigProvider configProvider)
         {
-            _settings = settings;
+            _configProvider = configProvider;
         }
 
-        public bool CanAffordUpgrade(UpgradeType type, PlayerData data)
+        public IReadOnlyList<UpgradeDefinition> GetAllUpgrades()
         {
-            int currentLevel = GetLevel(type, data);
-            
-            if (currentLevel >= _settings.MaxUpgradeLevel)
+            return _configProvider.Upgrades;
+        }
+
+        public UpgradeDefinition GetUpgrade(UpgradeStatType type)
+        {
+            return _configProvider.GetUpgrade(type);
+        }
+
+        public int GetCurrentLevel(UpgradeStatType type, PlayerData data)
+        {
+            return type switch
+            {
+                UpgradeStatType.LaunchPower => data.LaunchPowerLevel,
+                UpgradeStatType.MaxSpeed => data.MaxSpeedLevel,
+                UpgradeStatType.Steering => data.SteeringLevel,
+                UpgradeStatType.CoinValue => data.CoinValueLevel,
+                _ => 1
+            };
+        }
+
+        public bool CanAffordUpgrade(UpgradeStatType type, PlayerData data)
+        {
+            var upgrade = GetUpgrade(type);
+            if (upgrade == null) return false;
+
+            int currentLevel = GetCurrentLevel(type, data);
+
+            if (currentLevel >= upgrade.MaxLevel)
                 return false;
 
-            return data.Coins >= GetUpgradeCost(type, currentLevel);
+            return data.Coins >= upgrade.GetCost(currentLevel);
         }
 
-        public PlayerData ApplyUpgrade(UpgradeType type, PlayerData data)
+        public PlayerData ApplyUpgrade(UpgradeStatType type, PlayerData data)
         {
-            var updated = data.Clone();
-            int currentLevel = GetLevel(type, updated);
-            int cost = GetUpgradeCost(type, currentLevel);
-
-            if (updated.Coins < cost || currentLevel >= _settings.MaxUpgradeLevel)
+            var upgrade = GetUpgrade(type);
+            if (upgrade == null)
             {
-                Debug.LogWarning($"[Upgrade] Cannot apply upgrade {type}.");
+                Debug.LogWarning($"[UpgradeService] Upgrade not found: {type}");
+                return data;
+            }
+
+            var updated = data.Clone();
+            int currentLevel = GetCurrentLevel(type, updated);
+            int cost = upgrade.GetCost(currentLevel);
+
+            if (updated.Coins < cost || currentLevel >= upgrade.MaxLevel)
+            {
+                Debug.LogWarning($"[UpgradeService] Cannot apply upgrade {type}.");
                 return updated;
             }
 
@@ -44,50 +77,34 @@ namespace SledSurfers.Core.Services
 
             switch (type)
             {
-                case UpgradeType.LaunchPower:
+                case UpgradeStatType.LaunchPower:
                     updated.LaunchPowerLevel++;
                     break;
-                case UpgradeType.MaxSpeed:
+                case UpgradeStatType.MaxSpeed:
                     updated.MaxSpeedLevel++;
                     break;
-                case UpgradeType.SteeringResponsiveness:
+                case UpgradeStatType.Steering:
                     updated.SteeringLevel++;
                     break;
-                case UpgradeType.CoinValue:
+                case UpgradeStatType.CoinValue:
                     updated.CoinValueLevel++;
                     break;
             }
 
+            Debug.Log($"[UpgradeService] Applied {type} upgrade. New level: {GetCurrentLevel(type, updated)}");
             return updated;
         }
 
-        public int GetUpgradeCost(UpgradeType type, int currentLevel)
+        public int GetUpgradeCost(UpgradeStatType type, int currentLevel)
         {
-            return Mathf.RoundToInt(_settings.BaseUpgradeCost * Mathf.Pow(_settings.UpgradeCostMultiplier, currentLevel - 1));
+            var upgrade = GetUpgrade(type);
+            return upgrade?.GetCost(currentLevel) ?? 0;
         }
 
-        public float GetUpgradeValue(UpgradeType type, int level)
+        public float GetUpgradeValue(UpgradeStatType type, int level)
         {
-            return type switch
-            {
-                UpgradeType.LaunchPower => _settings.BaseLaunchForce + _settings.LaunchForcePerLevel * (level - 1),
-                UpgradeType.MaxSpeed => _settings.BaseMaxSpeed + _settings.MaxSpeedPerLevel * (level - 1),
-                UpgradeType.SteeringResponsiveness => _settings.BaseSteeringSpeed + _settings.SteeringSpeedPerLevel * (level - 1),
-                UpgradeType.CoinValue => _settings.BaseCoinValue + _settings.CoinValuePerLevel * (level - 1),
-                _ => 0f
-            };
-        }
-
-        private int GetLevel(UpgradeType type, PlayerData data)
-        {
-            return type switch
-            {
-                UpgradeType.LaunchPower => data.LaunchPowerLevel,
-                UpgradeType.MaxSpeed => data.MaxSpeedLevel,
-                UpgradeType.SteeringResponsiveness => data.SteeringLevel,
-                UpgradeType.CoinValue => data.CoinValueLevel,
-                _ => 1
-            };
+            var upgrade = GetUpgrade(type);
+            return upgrade?.GetValue(level) ?? 0f;
         }
     }
 }

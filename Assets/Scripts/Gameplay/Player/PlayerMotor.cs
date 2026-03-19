@@ -15,10 +15,10 @@ namespace SledSurfers.Gameplay.Player
     public sealed class PlayerMotor : IPlayerMotor
     {
         private readonly Rigidbody _rigidbody;
-        private readonly GameSettings _settings;
+        private GameSettings _settings;
 
-        private readonly float _maxSpeed;
-        private readonly float _steeringSpeed;
+        private float _maxSpeed;
+        private float _steeringSpeed;
         private float _lastReportedSpeed;
 
         public Vector3 Velocity => _rigidbody.linearVelocity;
@@ -32,8 +32,12 @@ namespace SledSurfers.Gameplay.Player
         public PlayerMotor(Rigidbody rigidbody, GameSettings settings, int maxSpeedLevel, int steeringLevel)
         {
             _rigidbody = rigidbody;
-            _settings = settings;
+            UpdateStats(settings, maxSpeedLevel, steeringLevel);
+        }
 
+        public void UpdateStats(GameSettings settings, int maxSpeedLevel, int steeringLevel)
+        {
+            _settings = settings;
             _maxSpeed = _settings.BaseMaxSpeed + _settings.MaxSpeedPerLevel * (maxSpeedLevel - 1);
             _steeringSpeed = _settings.BaseSteeringSpeed + _settings.SteeringSpeedPerLevel * (steeringLevel - 1);
         }

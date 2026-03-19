@@ -7,8 +7,8 @@ namespace SledSurfers.Gameplay.Slingshot
 {
     public class SlingshotController : ISlingshot
     {
-        private readonly GameSettings _settings;
-        private readonly int _launchPowerLevel;
+        private GameSettings _settings;
+        private int _launchPowerLevel;
         private readonly float _maxChargeTime;
 
         private float _chargeTime;
@@ -27,6 +27,12 @@ namespace SledSurfers.Gameplay.Slingshot
             _settings = settings;
             _launchPowerLevel = launchPowerLevel;
             _maxChargeTime = 1.5f;
+        }
+
+        public void UpdateStats(GameSettings settings, int launchPowerLevel)
+        {
+            _settings = settings;
+            _launchPowerLevel = launchPowerLevel;
         }
 
         public void StartCharging()

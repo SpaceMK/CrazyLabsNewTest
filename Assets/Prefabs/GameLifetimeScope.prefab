@@ -49,3 +49,4 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _gameSettings: {fileID: 11400000, guid: 25078c99d19300847b04f24be6433a3b, type: 2}
+  _upgradeConfig: {fileID: 11400000, guid: 98eb13a239bc8c541988163f30d93c19, type: 2}

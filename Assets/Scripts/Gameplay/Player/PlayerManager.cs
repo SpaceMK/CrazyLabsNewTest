@@ -81,7 +81,6 @@ namespace SledSurfers.Gameplay.Player
         public void CalculateDistance()
         {
            FinalDistance = Vector3.Distance(_startingPosition,transform.position); 
-           Debug.Log($"[PlayerManager] Final distance traveled: {FinalDistance:F2} units.");
         }
 
         public void ResetPlayer(Vector3 startPosition)

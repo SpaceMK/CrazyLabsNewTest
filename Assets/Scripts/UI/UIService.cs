@@ -16,14 +16,14 @@ namespace SledSurfers.UI.Services
         // Events from UI to Gameplay
         public event Action OnPlayClicked;
         public event Action OnMainMenuClicked;
-        public event Action OnPauseClicked;
-        public event Action OnResumeClicked;
+        public event Action OnUpgradesClicked;
+        public event Action OnCloseUpgradesClicked;
 
         // Events to UI Screens (driven by GameState)
         public event Action OnShowStartMenu;
         public event Action OnShowHUD;
         public event Action<float, int> OnShowGameOver;
-        public event Action OnShowPause;
+        public event Action OnShowUpgrades;
         public event Action<int> OnCoinsUpdated;
         public event Action<float> OnDistanceUpdated;
 
@@ -51,15 +51,15 @@ namespace SledSurfers.UI.Services
                 case GameState.Playing:
                     OnShowHUD?.Invoke();
                     break;
-
-                case GameState.Paused:
-                    OnShowPause?.Invoke();
-                    break;
-
                 case GameState.GameOver:
                     float distance = data?.Distance ?? 0f;
                     int coins = data?.CoinsCollected ?? 0;
                     OnShowGameOver?.Invoke(distance, coins);
+                    Debug.Log("HERE!!!");
+                    break;
+
+                case GameState.Upgrades:
+                    OnShowUpgrades?.Invoke();
                     break;
             }
         }
@@ -83,6 +83,16 @@ namespace SledSurfers.UI.Services
         public void TriggerMainMenu()
         {
             OnMainMenuClicked?.Invoke();
+        }
+
+        public void TriggerUpgrades()
+        {
+            OnUpgradesClicked?.Invoke();
+        }
+
+        public void TriggerCloseUpgrades()
+        {
+            OnCloseUpgradesClicked?.Invoke();
         }
     }
 }

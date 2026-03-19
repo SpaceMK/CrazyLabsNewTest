@@ -31,6 +31,7 @@ namespace SledSurfers.Gameplay
         private enum RunPhase
         {
             StartMenu,
+            Upgrades,
             WaitingToLaunch,
             Charging,
             Running,
@@ -71,12 +72,14 @@ namespace SledSurfers.Gameplay
             // Subscribe to UI events
             _uiService.OnPlayClicked += HandlePlayClicked;
             _uiService.OnMainMenuClicked += HandleMainMenu;
+            _uiService.OnUpgradesClicked += HandleUpgradesClicked;
+            _uiService.OnCloseUpgradesClicked += HandleCloseUpgrades;
 
             // Start with input disabled
             _input.Disable();
             _currentPhase = RunPhase.StartMenu;
 
-            // Transition to StartMenu state - UI will react automatically
+            // Transition to StartMenu state
             _gameState.TransitionTo(GameState.StartMenu);
 
             Debug.Log("[GameplayFlow] Ready. Showing start menu.");
@@ -84,11 +87,15 @@ namespace SledSurfers.Gameplay
 
         public void Tick()
         {
+            Debug.Log($"[GameplayFlow] Current phase: {_currentPhase}");
             switch (_currentPhase)
             {
                 case RunPhase.StartMenu:
+                case RunPhase.Upgrades:
+                    break;
+
                 case RunPhase.Ended:
-                    // Waiting for UI button clicks
+                   
                     break;
 
                 case RunPhase.WaitingToLaunch:
@@ -117,13 +124,42 @@ namespace SledSurfers.Gameplay
             }
         }
 
+        private void HandleUpgradesClicked()
+        {
+            if (_currentPhase == RunPhase.StartMenu)
+            {
+                _currentPhase = RunPhase.Upgrades;
+                _gameState.TransitionTo(GameState.Upgrades);
+                Debug.Log("[GameplayFlow] Showing upgrades.");
+            }
+        }
+
+        private void HandleCloseUpgrades()
+        {
+            if (_currentPhase == RunPhase.Upgrades)
+            {
+                // Reload player data in case upgrades were applied
+                _playerData = _playerDataService.Load();
+
+                // Reinitialize player with new stats
+                _player.Initialize(_settings, _playerData, _input);
+
+                _currentPhase = RunPhase.StartMenu;
+                _gameState.TransitionTo(GameState.StartMenu);
+                Debug.Log("[GameplayFlow] Closed upgrades, back to start menu.");
+            }
+        }
+
         private void StartGame()
         {
+            // Reload player data to get latest upgrades
+            _playerData = _playerDataService.Load();
+            _player.Initialize(_settings, _playerData, _input);
+
             _input.Enable();
             _coinsCollected = 0;
             _currentPhase = RunPhase.WaitingToLaunch;
 
-            // Transition to Playing state - UI will show HUD automatically
             _gameState.TransitionTo(GameState.Playing);
 
             Debug.Log("[GameplayFlow] Game started. Press to launch.");
@@ -200,7 +236,6 @@ namespace SledSurfers.Gameplay
             _playerData.Coins += _coinsCollected;
             _playerDataService.Save(_playerData);
 
-            // Transition to GameOver - UI will show game over screen automatically
             _gameState.TransitionTo(GameState.GameOver, new GameStateData
             {
                 Distance = distance,
@@ -213,11 +248,13 @@ namespace SledSurfers.Gameplay
         private void HandleMainMenu()
         {
             Debug.Log("[GameplayFlow] Main menu requested.");
-            // TODO: Load main menu scene
         }
 
         private void Retry()
         {
+            // Reload player data to get latest coin count
+            _playerData = _playerDataService.Load();
+
             _player.ResetPlayer(_startPosition);
             _coinLevelManager.Reset();
 
@@ -225,7 +262,6 @@ namespace SledSurfers.Gameplay
             _currentPhase = RunPhase.WaitingToLaunch;
             _input.Enable();
 
-            // Transition to Playing - UI will show HUD automatically
             _gameState.TransitionTo(GameState.Playing);
 
             Debug.Log("[GameplayFlow] Retry - ready to launch.");
