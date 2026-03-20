@@ -6,13 +6,14 @@ using VContainer;
 namespace SledSurfers.UI.Screens
 {
     /// <summary>
-    /// Start menu with Play button.
+    /// Start menu with Play and Upgrades buttons.
     /// Listens to UIService events driven by GameState.
     /// </summary>
     public class StartMenuScreen : MonoBehaviour
     {
         [SerializeField] private GameObject _root;
         [SerializeField] private Button _playButton;
+        [SerializeField] private Button _upgradesButton;
 
         private UIService _uiService;
 
@@ -34,9 +35,11 @@ namespace SledSurfers.UI.Screens
 
             _uiService.OnShowStartMenu += Show;
             _uiService.OnShowHUD += Hide;
+            _uiService.OnShowUpgrades += Hide;
             _uiService.OnShowGameOver += OnGameOver;
 
             _playButton.onClick.AddListener(OnPlayClicked);
+            _upgradesButton.onClick.AddListener(OnUpgradesClicked);
         }
 
         private void Unsubscribe()
@@ -45,9 +48,11 @@ namespace SledSurfers.UI.Screens
 
             _uiService.OnShowStartMenu -= Show;
             _uiService.OnShowHUD -= Hide;
+            _uiService.OnShowUpgrades -= Hide;
             _uiService.OnShowGameOver -= OnGameOver;
 
             _playButton.onClick.RemoveListener(OnPlayClicked);
+            _upgradesButton.onClick.RemoveListener(OnUpgradesClicked);
         }
 
         public void Show()
@@ -68,6 +73,11 @@ namespace SledSurfers.UI.Screens
         private void OnPlayClicked()
         {
             _uiService.TriggerPlay();
+        }
+
+        private void OnUpgradesClicked()
+        {
+            _uiService.TriggerUpgrades();
         }
     }
 }
