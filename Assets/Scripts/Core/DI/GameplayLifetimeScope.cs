@@ -16,19 +16,25 @@ namespace SledSurfers.Core.DI
     {
         [SerializeField] private PlayerManager _playerManager;
         [SerializeField] private LevelPoolProvider _levelPoolProvider;
+        [SerializeField] private ObstacleLevelManager _obstacleLevelManager;
         [SerializeField] private CoinLevelManager _coinLevelManager;
 
         protected override void Configure(IContainerBuilder builder)
         {
             Debug.Log("[DI] Configuring GameplayLifetimeScope...");
 
-            builder.Register<InputHandler>(Lifetime.Scoped)
+            builder.Register<SimpleInputHandler>(Lifetime.Scoped)
                 .As<IInputHandler>();
 
             builder.RegisterComponent(_playerManager);
 
             if (_levelPoolProvider != null)
                 builder.RegisterComponent(_levelPoolProvider);
+
+            // Register ObstacleLevelManager BEFORE CoinLevelManager
+            // This ensures obstacles spawn first, then coins avoid them
+            if (_obstacleLevelManager != null)
+                builder.RegisterComponent(_obstacleLevelManager);
 
             if (_coinLevelManager != null)
                 builder.RegisterComponent(_coinLevelManager);

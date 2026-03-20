@@ -9,8 +9,11 @@ using VContainer.Unity;
 
 namespace SledSurfers.Gameplay
 {
-    
-    public  class GameplayFlow : IStartable, ITickable
+    /// <summary>
+    /// Orchestrates the gameplay loop.
+    /// Decoupled from UI - communicates only via IGameStateManager and IUIService events.
+    /// </summary>
+    public sealed class GameplayFlow : IStartable, ITickable
     {
         private readonly IInputHandler _input;
         private readonly IGameStateManager _gameState;
@@ -19,6 +22,7 @@ namespace SledSurfers.Gameplay
         private readonly GameSettings _settings;
         private readonly PlayerManager _player;
         private readonly CoinLevelManager _coinLevelManager;
+        private readonly ObstacleLevelManager _obstacleLevelManager;
 
         private PlayerData _playerData;
         private Vector3 _startPosition;
@@ -42,7 +46,8 @@ namespace SledSurfers.Gameplay
             IUIService uiService,
             GameSettings settings,
             PlayerManager player,
-            CoinLevelManager coinLevelManager)
+            CoinLevelManager coinLevelManager,
+            ObstacleLevelManager obstacleLevelManager)
         {
             _input = input;
             _gameState = gameState;
@@ -51,6 +56,7 @@ namespace SledSurfers.Gameplay
             _settings = settings;
             _player = player;
             _coinLevelManager = coinLevelManager;
+            _obstacleLevelManager = obstacleLevelManager;
         }
 
         public void Start()
@@ -89,7 +95,6 @@ namespace SledSurfers.Gameplay
                 case RunPhase.StartMenu:
                 case RunPhase.Upgrades:
                 case RunPhase.Ended:
-                    // Waiting for UI button clicks
                     break;
 
                 case RunPhase.WaitingToLaunch:
@@ -244,7 +249,8 @@ namespace SledSurfers.Gameplay
             // Reset player position
             _player.ResetPlayer(_startPosition);
 
-            // Reset level objects
+            // Reset level objects (obstacles first, then coins)
+            _obstacleLevelManager.Reset();
             _coinLevelManager.Reset();
 
             // Reset state
@@ -264,6 +270,9 @@ namespace SledSurfers.Gameplay
             _playerData = _playerDataService.Load();
 
             _player.ResetPlayer(_startPosition);
+
+            // Reset level objects (obstacles first, then coins)
+            _obstacleLevelManager.Reset();
             _coinLevelManager.Reset();
 
             _coinsCollected = 0;

@@ -150,9 +150,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7cbad3185519e44e8d0dbed3c730500, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _target: {fileID: 0}
-  _height: 5
-  _distance: 4
+  _playerManager: {fileID: 0}
+  _height: 3
+  _distance: 3
   _lookAheadDistance: 10
   _followSpeed: 8
   _rotationSpeed: 5

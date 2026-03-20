@@ -6,10 +6,6 @@ using UnityEngine.UI;
 
 namespace SledSurfers.UI.Upgrades
 {
-    /// <summary>
-    /// Individual upgrade item UI.
-    /// Displays name, level, cost, and upgrade button.
-    /// </summary>
     public class UpgradeItemView : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI _nameText;

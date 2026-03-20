@@ -5,10 +5,6 @@ using UnityEngine;
 
 namespace SledSurfers.UI.Services
 {
-    /// <summary>
-    /// Service for cross-scene UI communication.
-    /// Listens to GameStateManager and broadcasts UI events.
-    /// </summary>
     public class UIService : IUIService, IDisposable
     {
         private readonly IGameStateManager _gameState;
@@ -55,7 +51,6 @@ namespace SledSurfers.UI.Services
                     float distance = data?.Distance ?? 0f;
                     int coins = data?.CoinsCollected ?? 0;
                     OnShowGameOver?.Invoke(distance, coins);
-                    Debug.Log("HERE!!!");
                     break;
 
                 case GameState.Upgrades:

@@ -10,10 +10,6 @@ using VContainer;
 
 namespace SledSurfers.UI.Upgrades
 {
-    /// <summary>
-    /// Upgrade screen showing all available upgrades.
-    /// Dynamically creates UI from UpgradeConfig.
-    /// </summary>
     public class UpgradeScreen : MonoBehaviour
     {
         [SerializeField] private GameObject _root;
@@ -43,12 +39,6 @@ namespace SledSurfers.UI.Upgrades
             CreateUpgradeItems();
         }
 
-        private void OnDestroy()
-        {
-            Unsubscribe();
-            ClearUpgradeItems();
-        }
-
         private void Subscribe()
         {
             _uiService.OnShowUpgrades += Show;
@@ -56,15 +46,6 @@ namespace SledSurfers.UI.Upgrades
             _uiService.OnShowStartMenu += Hide;
 
             _closeButton.onClick.AddListener(OnCloseClicked);
-        }
-
-        private void Unsubscribe()
-        {
-            _uiService.OnShowUpgrades -= Show;
-            _uiService.OnShowHUD -= Hide;
-            _uiService.OnShowStartMenu -= Hide;
-
-            _closeButton.onClick.RemoveListener(OnCloseClicked);
         }
 
         private void CreateUpgradeItems()
@@ -81,16 +62,7 @@ namespace SledSurfers.UI.Upgrades
             Debug.Log($"[UpgradeScreen] Created {_upgradeItems.Count} upgrade items.");
         }
 
-        private void ClearUpgradeItems()
-        {
-            foreach (var item in _upgradeItems)
-            {
-                item.OnUpgradeClicked -= HandleUpgrade;
-                if (item != null)
-                    Destroy(item.gameObject);
-            }
-            _upgradeItems.Clear();
-        }
+       
 
         public void Show()
         {

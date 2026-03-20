@@ -6,10 +6,7 @@ using UnityEngine;
 
 namespace SledSurfers.Core.Services
 {
-    /// <summary>
-    /// Calculates upgrade costs and applies upgrades to player data.
-    /// Uses IUpgradeConfigProvider for configuration.
-    /// </summary>
+
     public sealed class UpgradeService : IUpgradeService
     {
         private readonly IUpgradeConfigProvider _configProvider;
