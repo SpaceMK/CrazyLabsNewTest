@@ -41,16 +41,17 @@ namespace SledSurfers.Core.DI
             builder.Register<ScriptableObjectUpgradeConfigProvider>(Lifetime.Singleton)
                 .As<IUpgradeConfigProvider>();
 
-            // Upgrade Service - uses config provider
             builder.Register<UpgradeService>(Lifetime.Singleton)
                 .As<IUpgradeService>();
 
             builder.Register<PoolManager>(Lifetime.Singleton)
                 .As<IPoolManager>();
 
+            // UIService registered ONLY as IUIService.
+            // All consumers (screens + gameplay) depend on the interface.
+            // No more .AsSelf() — concrete type is never injected directly.
             builder.Register<UIService>(Lifetime.Singleton)
-                .As<IUIService>()
-                .AsSelf();
+                .As<IUIService>();
 
             builder.RegisterEntryPoint<BootstrapFlow>();
         }

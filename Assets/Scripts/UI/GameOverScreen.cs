@@ -1,4 +1,4 @@
-using SledSurfers.UI.Services;
+using SledSurfers.UI.Interfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +8,7 @@ namespace SledSurfers.UI.Screens
 {
     /// <summary>
     /// Game over screen with results and play again button.
-    /// Listens to UIService events driven by GameState.
+    /// Depends on IUIService (not concrete UIService) — DIP.
     /// </summary>
     public class GameOverScreen : MonoBehaviour
     {
@@ -18,10 +18,10 @@ namespace SledSurfers.UI.Screens
         [SerializeField] private Button _playAgainButton;
         [SerializeField] private Button _mainMenuButton;
 
-        private UIService _uiService;
+        private IUIService _uiService;
 
         [Inject]
-        public void Construct(UIService uiService)
+        public void Construct(IUIService uiService)
         {
             _uiService = uiService;
             Subscribe();

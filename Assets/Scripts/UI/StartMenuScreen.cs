@@ -1,4 +1,4 @@
-using SledSurfers.UI.Services;
+using SledSurfers.UI.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -7,7 +7,7 @@ namespace SledSurfers.UI.Screens
 {
     /// <summary>
     /// Start menu with Play and Upgrades buttons.
-    /// Listens to UIService events driven by GameState.
+    /// Depends on IUIService (not concrete UIService) — DIP.
     /// </summary>
     public class StartMenuScreen : MonoBehaviour
     {
@@ -15,10 +15,10 @@ namespace SledSurfers.UI.Screens
         [SerializeField] private Button _playButton;
         [SerializeField] private Button _upgradesButton;
 
-        private UIService _uiService;
+        private IUIService _uiService;
 
         [Inject]
-        public void Construct(UIService uiService)
+        public void Construct(IUIService uiService)
         {
             _uiService = uiService;
             Subscribe();

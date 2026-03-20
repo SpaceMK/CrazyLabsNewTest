@@ -1,10 +1,15 @@
-﻿using System;
+using System;
 using SledSurfers.Core.Interfaces;
 using SledSurfers.UI.Interfaces;
 using UnityEngine;
 
 namespace SledSurfers.UI.Services
 {
+    /// <summary>
+    /// Mediates between GameState transitions and UI screen visibility.
+    /// Implements the full IUIService contract so all consumers (screens and gameplay)
+    /// depend on the interface, not this concrete class.
+    /// </summary>
     public class UIService : IUIService, IDisposable
     {
         private readonly IGameStateManager _gameState;
@@ -47,6 +52,7 @@ namespace SledSurfers.UI.Services
                 case GameState.Playing:
                     OnShowHUD?.Invoke();
                     break;
+
                 case GameState.GameOver:
                     float distance = data?.Distance ?? 0f;
                     int coins = data?.CoinsCollected ?? 0;
@@ -69,7 +75,6 @@ namespace SledSurfers.UI.Services
             OnDistanceUpdated?.Invoke(distance);
         }
 
-        // Called by UI buttons
         public void TriggerPlay()
         {
             OnPlayClicked?.Invoke();

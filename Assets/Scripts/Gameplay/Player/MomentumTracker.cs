@@ -4,7 +4,13 @@ using UnityEngine;
 
 namespace SledSurfers.Gameplay.Player
 {
-    public class MomentumTracker : IMomentumTracker
+    /// <summary>
+    /// Tracks player momentum and fires OnMomentumLost when speed drops to zero.
+    /// Subscribes to IPlayerMotor.OnSpeedChanged internally.
+    /// 
+    /// Implements IDisposable to properly unsubscribe from motor events.
+    /// </summary>
+    public class MomentumTracker : IMomentumTracker, IDisposable
     {
         private readonly IPlayerMotor _motor;
         private readonly float _stallDuration;
@@ -42,15 +48,13 @@ namespace SledSurfers.Gameplay.Player
 
         private void HandleSpeedChanged(float speed)
         {
-            
             if (!_isTracking) return;
 
-            if (speed <= 0.1f) // Effectively stopped
+            if (speed <= 0.1f)
             {
-                    _isStopped = true;
-                    OnMomentumLost?.Invoke();
-                    StopTracking();
-                
+                _isStopped = true;
+                OnMomentumLost?.Invoke();
+                StopTracking();
             }
         }
 

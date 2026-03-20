@@ -8,10 +8,7 @@ using VContainer.Unity;
 
 namespace SledSurfers.Core.DI
 {
-    /// <summary>
-    /// Lifetime scope for Gameplay scene.
-    /// Child of GameLifetimeScope - inherits PoolManager, UIService, GameStateManager, etc.
-    /// </summary>
+
     public sealed class GameplayLifetimeScope : LifetimeScope
     {
         [SerializeField] private PlayerManager _playerManager;
@@ -31,13 +28,21 @@ namespace SledSurfers.Core.DI
             if (_levelPoolProvider != null)
                 builder.RegisterComponent(_levelPoolProvider);
 
-            // Register ObstacleLevelManager BEFORE CoinLevelManager
-            // This ensures obstacles spawn first, then coins avoid them
+           
             if (_obstacleLevelManager != null)
-                builder.RegisterComponent(_obstacleLevelManager);
+            {
+                builder.RegisterComponent(_obstacleLevelManager)
+                    .As<ISpawnPositionProvider>()
+                    .As<ILevelManager>();
+            }
 
+          
             if (_coinLevelManager != null)
-                builder.RegisterComponent(_coinLevelManager);
+            {
+                builder.RegisterComponent(_coinLevelManager)
+                    .As<ICoinDespawner>()
+                    .As<ILevelManager>();
+            }
 
             builder.RegisterEntryPoint<GameplayFlow>();
         }

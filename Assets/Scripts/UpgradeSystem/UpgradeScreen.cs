@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using SledSurfers.Core.Interfaces;
 using SledSurfers.Data.Models;
 using SledSurfers.Data.Upgrades;
-using SledSurfers.UI.Services;
+using SledSurfers.UI.Interfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +10,10 @@ using VContainer;
 
 namespace SledSurfers.UI.Upgrades
 {
+    /// <summary>
+    /// Upgrade screen UI.
+    /// Depends on IUIService (not concrete UIService) — DIP.
+    /// </summary>
     public class UpgradeScreen : MonoBehaviour
     {
         [SerializeField] private GameObject _root;
@@ -18,7 +22,7 @@ namespace SledSurfers.UI.Upgrades
         [SerializeField] private Transform _upgradesContainer;
         [SerializeField] private UpgradeItemView _upgradeItemPrefab;
 
-        private UIService _uiService;
+        private IUIService _uiService;
         private IUpgradeService _upgradeService;
         private IPlayerDataService _playerDataService;
         private PlayerData _playerData;
@@ -27,7 +31,7 @@ namespace SledSurfers.UI.Upgrades
 
         [Inject]
         public void Construct(
-            UIService uiService,
+            IUIService uiService,
             IUpgradeService upgradeService,
             IPlayerDataService playerDataService)
         {
@@ -61,8 +65,6 @@ namespace SledSurfers.UI.Upgrades
 
             Debug.Log($"[UpgradeScreen] Created {_upgradeItems.Count} upgrade items.");
         }
-
-       
 
         public void Show()
         {

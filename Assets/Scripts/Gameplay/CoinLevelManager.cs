@@ -8,9 +8,17 @@ namespace SledSurfers.Gameplay.Level
 {
     /// <summary>
     /// Manages coin placement on the level.
-    /// Avoids spawning near obstacles by querying ISpawnPositionProvider.
+    /// Avoids spawning near obstacles by querying ISpawnPositionProvider (injected via DI).
+    /// 
+    /// Implements:
+    /// - ILevelManager: so GameplayFlow can reset coins without knowing this concrete type.
+    /// - ICoinDespawner: so PlayerCollisionHandler can despawn coins without a direct dependency.
+    /// 
+    /// NOTE: Initialize() only wires dependencies — it does NOT spawn.
+    /// Spawning is triggered by GameplayFlow.Start() via ILevelManager.Reset(),
+    /// which runs after all [Inject] methods complete, guaranteeing pools are ready.
     /// </summary>
-    public class CoinLevelManager : MonoBehaviour
+    public class CoinLevelManager : MonoBehaviour, ILevelManager, ICoinDespawner
     {
         [Header("Spawn Bounds")]
         [SerializeField] private Vector3 _minBounds = new(-5f, 1f, 10f);
@@ -32,16 +40,17 @@ namespace SledSurfers.Gameplay.Level
 
         public IReadOnlyList<IPoolingObject> ActiveCoins => _activeCoins;
 
+        /// <summary>
+        /// DI injection. ISpawnPositionProvider is optional (null if no obstacles exist).
+        /// Wires dependencies only — does NOT spawn. See class summary.
+        /// </summary>
         [Inject]
-        public void Initialize(IPoolManager poolManager)
+        public void Initialize(IPoolManager poolManager, ISpawnPositionProvider obstaclePositionProvider = null)
         {
             _poolManager = poolManager;
-
-            // Find obstacle provider (optional - coins can spawn without it)
-            _obstaclePositionProvider = FindFirstObjectByType<ObstacleLevelManager>();
+            _obstaclePositionProvider = obstaclePositionProvider;
 
             Debug.Log($"[CoinLevelManager] Initialized. ObstacleProvider: {_obstaclePositionProvider != null}");
-            SpawnAllCoins();
         }
 
         public void SpawnAllCoins()
@@ -88,7 +97,6 @@ namespace SledSurfers.Gameplay.Level
 
         private bool IsValidPosition(Vector3 position)
         {
-            // Check distance to other coins
             foreach (var existing in _spawnedPositions)
             {
                 float distance = Vector3.Distance(
@@ -102,7 +110,6 @@ namespace SledSurfers.Gameplay.Level
                 }
             }
 
-            // Check distance to obstacles
             if (_obstaclePositionProvider != null)
             {
                 var obstaclePositions = _obstaclePositionProvider.GetOccupiedPositions();
@@ -144,6 +151,9 @@ namespace SledSurfers.Gameplay.Level
             _poolManager.Return(coin);
         }
 
+        /// <summary>
+        /// ICoinDespawner implementation.
+        /// </summary>
         public void DespawnCoin(GameObject coinGameObject)
         {
             var coin = _activeCoins.Find(c => c.GameObject == coinGameObject);
@@ -163,6 +173,9 @@ namespace SledSurfers.Gameplay.Level
             _spawnedPositions.Clear();
         }
 
+        /// <summary>
+        /// ILevelManager implementation.
+        /// </summary>
         public void Reset()
         {
             DespawnAll();

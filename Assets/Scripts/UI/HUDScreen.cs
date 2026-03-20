@@ -1,4 +1,4 @@
-using SledSurfers.UI.Services;
+using SledSurfers.UI.Interfaces;
 using TMPro;
 using UnityEngine;
 using VContainer;
@@ -7,7 +7,7 @@ namespace SledSurfers.UI.Screens
 {
     /// <summary>
     /// In-game HUD showing coins and distance.
-    /// Listens to UIService events driven by GameState.
+    /// Depends on IUIService (not concrete UIService) — DIP.
     /// </summary>
     public class HUDScreen : MonoBehaviour
     {
@@ -15,10 +15,10 @@ namespace SledSurfers.UI.Screens
         [SerializeField] private TextMeshProUGUI _coinsText;
         [SerializeField] private TextMeshProUGUI _distanceText;
 
-        private UIService _uiService;
+        private IUIService _uiService;
 
         [Inject]
-        public void Construct(UIService uiService)
+        public void Construct(IUIService uiService)
         {
             _uiService = uiService;
             Subscribe();

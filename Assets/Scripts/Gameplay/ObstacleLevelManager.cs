@@ -9,8 +9,13 @@ namespace SledSurfers.Gameplay.Level
     /// <summary>
     /// Manages obstacle placement on the level.
     /// Implements ISpawnPositionProvider so CoinLevelManager can avoid spawning near obstacles.
+    /// Implements ILevelManager so GameplayFlow can reset without knowing the concrete type.
+    /// 
+    /// NOTE: Initialize() only wires dependencies — it does NOT spawn.
+    /// Spawning is triggered by GameplayFlow.Start() via ILevelManager.Reset(),
+    /// which runs after all [Inject] methods complete, guaranteeing pools are ready.
     /// </summary>
-    public class ObstacleLevelManager : MonoBehaviour, ISpawnPositionProvider
+    public class ObstacleLevelManager : MonoBehaviour, ISpawnPositionProvider, ILevelManager
     {
         [Header("Spawn Bounds")]
         [SerializeField] private Vector3 _minBounds = new(-5f, 0f, 20f);
@@ -31,12 +36,14 @@ namespace SledSurfers.Gameplay.Level
 
         public IReadOnlyList<IPoolingObject> ActiveObstacles => _activeObstacles;
 
+        /// <summary>
+        /// Wires dependencies only — does NOT spawn. See class summary.
+        /// </summary>
         [Inject]
         public void Initialize(IPoolManager poolManager)
         {
             _poolManager = poolManager;
             Debug.Log("[ObstacleLevelManager] Initialized.");
-            SpawnAllObstacles();
         }
 
         public IReadOnlyList<Vector3> GetOccupiedPositions()
@@ -150,6 +157,9 @@ namespace SledSurfers.Gameplay.Level
             _spawnedPositions.Clear();
         }
 
+        /// <summary>
+        /// ILevelManager implementation.
+        /// </summary>
         public void Reset()
         {
             DespawnAll();

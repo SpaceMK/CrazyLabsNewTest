@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SledSurfers.Core.Interfaces;
 using SledSurfers.Data.Models;
@@ -6,10 +7,41 @@ using UnityEngine;
 
 namespace SledSurfers.Core.Services
 {
-
+    /// <summary>
+    /// Handles upgrade logic and cost calculations.
+    /// 
+    /// Uses dictionary-based dispatch instead of switch statements so that
+    /// adding a new UpgradeStatType only requires adding entries to the
+    /// dictionaries — no method bodies need to change (OCP).
+    /// 
+    /// Trade-off: Slightly more indirection than a switch, but scales cleanly
+    /// and eliminates the risk of forgetting a case when new types are added.
+    /// </summary>
     public sealed class UpgradeService : IUpgradeService
     {
         private readonly IUpgradeConfigProvider _configProvider;
+
+        /// <summary>
+        /// Maps each stat type to a getter that reads the current level from PlayerData.
+        /// </summary>
+        private static readonly Dictionary<UpgradeStatType, Func<PlayerData, int>> LevelGetters = new()
+        {
+            { UpgradeStatType.LaunchPower, d => d.LaunchPowerLevel },
+            { UpgradeStatType.MaxSpeed,    d => d.MaxSpeedLevel },
+            { UpgradeStatType.Steering,    d => d.SteeringLevel },
+            { UpgradeStatType.CoinValue,   d => d.CoinValueLevel },
+        };
+
+        /// <summary>
+        /// Maps each stat type to a mutator that increments the level on PlayerData.
+        /// </summary>
+        private static readonly Dictionary<UpgradeStatType, Action<PlayerData>> LevelSetters = new()
+        {
+            { UpgradeStatType.LaunchPower, d => d.LaunchPowerLevel++ },
+            { UpgradeStatType.MaxSpeed,    d => d.MaxSpeedLevel++ },
+            { UpgradeStatType.Steering,    d => d.SteeringLevel++ },
+            { UpgradeStatType.CoinValue,   d => d.CoinValueLevel++ },
+        };
 
         public UpgradeService(IUpgradeConfigProvider configProvider)
         {
@@ -28,14 +60,7 @@ namespace SledSurfers.Core.Services
 
         public int GetCurrentLevel(UpgradeStatType type, PlayerData data)
         {
-            return type switch
-            {
-                UpgradeStatType.LaunchPower => data.LaunchPowerLevel,
-                UpgradeStatType.MaxSpeed => data.MaxSpeedLevel,
-                UpgradeStatType.Steering => data.SteeringLevel,
-                UpgradeStatType.CoinValue => data.CoinValueLevel,
-                _ => 1
-            };
+            return LevelGetters.TryGetValue(type, out var getter) ? getter(data) : 1;
         }
 
         public bool CanAffordUpgrade(UpgradeStatType type, PlayerData data)
@@ -72,20 +97,9 @@ namespace SledSurfers.Core.Services
 
             updated.Coins -= cost;
 
-            switch (type)
+            if (LevelSetters.TryGetValue(type, out var setter))
             {
-                case UpgradeStatType.LaunchPower:
-                    updated.LaunchPowerLevel++;
-                    break;
-                case UpgradeStatType.MaxSpeed:
-                    updated.MaxSpeedLevel++;
-                    break;
-                case UpgradeStatType.Steering:
-                    updated.SteeringLevel++;
-                    break;
-                case UpgradeStatType.CoinValue:
-                    updated.CoinValueLevel++;
-                    break;
+                setter(updated);
             }
 
             Debug.Log($"[UpgradeService] Applied {type} upgrade. New level: {GetCurrentLevel(type, updated)}");

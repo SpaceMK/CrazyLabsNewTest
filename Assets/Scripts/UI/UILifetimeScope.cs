@@ -1,4 +1,3 @@
-using SledSurfers.Core.DI;
 using SledSurfers.UI.Screens;
 using SledSurfers.UI.Upgrades;
 using UnityEngine;
@@ -9,7 +8,10 @@ namespace SledSurfers.UI
 {
     /// <summary>
     /// Lifetime scope for UI scene.
-    /// Child of GameLifetimeScope - inherits UIService.
+    /// Child of GameLifetimeScope — inherits IUIService (via UIService singleton).
+    /// 
+    /// Screens are registered as components so VContainer calls their [Inject] methods,
+    /// which subscribe to IUIService events for show/hide driven by GameState.
     /// </summary>
     public class UILifetimeScope : LifetimeScope
     {
@@ -30,6 +32,7 @@ namespace SledSurfers.UI
 
             if (_gameOverScreen != null)
                 builder.RegisterComponent(_gameOverScreen);
+
             if (_upgradeScreen != null)
                 builder.RegisterComponent(_upgradeScreen);
         }

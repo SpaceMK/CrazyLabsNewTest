@@ -1,13 +1,14 @@
 using System;
 using SledSurfers.Core.Interfaces;
-using SledSurfers.Gameplay.Level;
 using UnityEngine;
 
 namespace SledSurfers.Gameplay.Player
 {
     /// <summary>
     /// Handles player collisions with obstacles and collectibles.
-    /// Notifies PoolManager to return collected coins to pool.
+    /// 
+    /// Depends on ICoinDespawner (not CoinLevelManager) to return
+    /// collected coins to pool — DIP.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Collider))]
@@ -15,16 +16,17 @@ namespace SledSurfers.Gameplay.Player
     {
         private const string ObstacleTag = "Obstacle";
         private const string CoinTag = "Coin";
-        private CoinLevelManager _coinLevelManager;
+
+        private ICoinDespawner _coinDespawner;
+
         public event Action OnCrash;
         public event Action<int> OnCoinCollected;
 
-        public void Initialize(CoinLevelManager coinLevelManager)
+        public void Initialize(ICoinDespawner coinDespawner)
         {
-            _coinLevelManager = coinLevelManager;
-            Debug.Log($"[PlayerCollisionHandler] PoolManager injected successfully");
+            _coinDespawner = coinDespawner;
+            Debug.Log("[PlayerCollisionHandler] Initialized with ICoinDespawner.");
         }
-       
 
         private void OnCollisionEnter(Collision collision)
         {
@@ -37,15 +39,12 @@ namespace SledSurfers.Gameplay.Player
 
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log($"[Trigger] Entered trigger: {other.gameObject.name} with tag {other.gameObject.tag}");
             if (other.CompareTag(CoinTag))
             {
                 Debug.Log($"[Collision] Coin collected: {other.gameObject.name}");
 
-                // Notify listeners
                 OnCoinCollected?.Invoke(1);
-                _coinLevelManager.DespawnCoin(other.gameObject);
-               
+                _coinDespawner?.DespawnCoin(other.gameObject);
             }
         }
     }
