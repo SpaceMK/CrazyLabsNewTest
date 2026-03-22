@@ -97,6 +97,10 @@ namespace SledSurfers.Gameplay.Player
             _startingPosition = transform.position;
         }
 
+        void FixedUpdate()
+        {
+            _motor.AlignToSurface(Time.deltaTime);
+        }
         public void CalculateDistance()
         {
             FinalDistance = Vector3.Distance(_startingPosition, transform.position);

@@ -1,341 +1,1007 @@
 fileFormatVersion: 2
 guid: d6d38f4d7d206d349b7c89db18dbcb11
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Cafe
-    100002: Eiffel_Tower
-    100004: H1
-    100006: H1 (2)
-    100008: H1 (3)
-    100010: H1 (4)
-    100012: H1 (5)
-    100014: H1 (6)
-    100016: H1 (7)
-    100018: H1 (8)
-    100020: H2
-    100022: H2 (2)
-    100024: H2 (3)
-    100026: H2 (4)
-    100028: H2 (5)
-    100030: H2 (6)
-    100032: H2 (7)
-    100034: H2 (8)
-    100036: H2 (9)
-    100038: H3
-    100040: H3 (2)
-    100042: H3 (3)
-    100044: H3 (4)
-    100046: H4
-    100048: H4 (2)
-    100050: H4 (3)
-    100052: H4 (4)
-    100054: H4 (5)
-    100056: H5
-    100058: H5 (10)
-    100060: H5 (2)
-    100062: H5 (3)
-    100064: H5 (4)
-    100066: H5 (5)
-    100068: H5 (6)
-    100070: H5 (7)
-    100072: H5 (8)
-    100074: H5 (9)
-    100076: H6
-    100078: H6 (10)
-    100080: H6 (2)
-    100082: H6 (3)
-    100084: H6 (4)
-    100086: H6 (5)
-    100088: H6 (6)
-    100090: H6 (7)
-    100092: H6 (8)
-    100094: H6 (9)
-    100096: Louvre
-    100098: //RootNode
-    100100: Mesh
-    100102: Museum
-    100104: School
-    100106: Theater
-    100108: Triumphial_Arch
-    100110: Villa
-    100112: H1 (10)
-    100114: H1 (9)
-    100116: H2 (10)
-    100118: H2 (11)
-    100120: H3 (5)
-    100122: H4 (6)
-    100124: H4 (7)
-    100126: H5 (11)
-    100128: H6 (11)
-    100130: H6 (12)
-    100132: Mesh (2)
-    400000: Cafe
-    400002: Eiffel_Tower
-    400004: H1
-    400006: H1 (2)
-    400008: H1 (3)
-    400010: H1 (4)
-    400012: H1 (5)
-    400014: H1 (6)
-    400016: H1 (7)
-    400018: H1 (8)
-    400020: H2
-    400022: H2 (2)
-    400024: H2 (3)
-    400026: H2 (4)
-    400028: H2 (5)
-    400030: H2 (6)
-    400032: H2 (7)
-    400034: H2 (8)
-    400036: H2 (9)
-    400038: H3
-    400040: H3 (2)
-    400042: H3 (3)
-    400044: H3 (4)
-    400046: H4
-    400048: H4 (2)
-    400050: H4 (3)
-    400052: H4 (4)
-    400054: H4 (5)
-    400056: H5
-    400058: H5 (10)
-    400060: H5 (2)
-    400062: H5 (3)
-    400064: H5 (4)
-    400066: H5 (5)
-    400068: H5 (6)
-    400070: H5 (7)
-    400072: H5 (8)
-    400074: H5 (9)
-    400076: H6
-    400078: H6 (10)
-    400080: H6 (2)
-    400082: H6 (3)
-    400084: H6 (4)
-    400086: H6 (5)
-    400088: H6 (6)
-    400090: H6 (7)
-    400092: H6 (8)
-    400094: H6 (9)
-    400096: Louvre
-    400098: //RootNode
-    400100: Mesh
-    400102: Museum
-    400104: School
-    400106: Theater
-    400108: Triumphial_Arch
-    400110: Villa
-    400112: H1 (10)
-    400114: H1 (9)
-    400116: H2 (10)
-    400118: H2 (11)
-    400120: H3 (5)
-    400122: H4 (6)
-    400124: H4 (7)
-    400126: H5 (11)
-    400128: H6 (11)
-    400130: H6 (12)
-    400132: Mesh (2)
-    2300000: Cafe
-    2300002: Eiffel_Tower
-    2300004: H1
-    2300006: H1 (2)
-    2300008: H1 (3)
-    2300010: H1 (4)
-    2300012: H1 (5)
-    2300014: H1 (6)
-    2300016: H1 (7)
-    2300018: H1 (8)
-    2300020: H2
-    2300022: H2 (2)
-    2300024: H2 (3)
-    2300026: H2 (4)
-    2300028: H2 (5)
-    2300030: H2 (6)
-    2300032: H2 (7)
-    2300034: H2 (8)
-    2300036: H2 (9)
-    2300038: H3
-    2300040: H3 (2)
-    2300042: H3 (3)
-    2300044: H3 (4)
-    2300046: H4
-    2300048: H4 (2)
-    2300050: H4 (3)
-    2300052: H4 (4)
-    2300054: H4 (5)
-    2300056: H5
-    2300058: H5 (10)
-    2300060: H5 (2)
-    2300062: H5 (3)
-    2300064: H5 (4)
-    2300066: H5 (5)
-    2300068: H5 (6)
-    2300070: H5 (7)
-    2300072: H5 (8)
-    2300074: H5 (9)
-    2300076: H6
-    2300078: H6 (10)
-    2300080: H6 (2)
-    2300082: H6 (3)
-    2300084: H6 (4)
-    2300086: H6 (5)
-    2300088: H6 (6)
-    2300090: H6 (7)
-    2300092: H6 (8)
-    2300094: H6 (9)
-    2300096: Louvre
-    2300098: Mesh
-    2300100: Museum
-    2300102: School
-    2300104: Theater
-    2300106: Triumphial_Arch
-    2300108: Villa
-    2300110: H1 (10)
-    2300112: H1 (9)
-    2300114: H2 (10)
-    2300116: H2 (11)
-    2300118: H3 (5)
-    2300120: H4 (6)
-    2300122: H4 (7)
-    2300124: H5 (11)
-    2300126: H6 (11)
-    2300128: H6 (12)
-    2300130: Mesh (2)
-    3300000: Cafe
-    3300002: Eiffel_Tower
-    3300004: H1
-    3300006: H1 (2)
-    3300008: H1 (3)
-    3300010: H1 (4)
-    3300012: H1 (5)
-    3300014: H1 (6)
-    3300016: H1 (7)
-    3300018: H1 (8)
-    3300020: H2
-    3300022: H2 (2)
-    3300024: H2 (3)
-    3300026: H2 (4)
-    3300028: H2 (5)
-    3300030: H2 (6)
-    3300032: H2 (7)
-    3300034: H2 (8)
-    3300036: H2 (9)
-    3300038: H3
-    3300040: H3 (2)
-    3300042: H3 (3)
-    3300044: H3 (4)
-    3300046: H4
-    3300048: H4 (2)
-    3300050: H4 (3)
-    3300052: H4 (4)
-    3300054: H4 (5)
-    3300056: H5
-    3300058: H5 (10)
-    3300060: H5 (2)
-    3300062: H5 (3)
-    3300064: H5 (4)
-    3300066: H5 (5)
-    3300068: H5 (6)
-    3300070: H5 (7)
-    3300072: H5 (8)
-    3300074: H5 (9)
-    3300076: H6
-    3300078: H6 (10)
-    3300080: H6 (2)
-    3300082: H6 (3)
-    3300084: H6 (4)
-    3300086: H6 (5)
-    3300088: H6 (6)
-    3300090: H6 (7)
-    3300092: H6 (8)
-    3300094: H6 (9)
-    3300096: Louvre
-    3300098: Mesh
-    3300100: Museum
-    3300102: School
-    3300104: Theater
-    3300106: Triumphial_Arch
-    3300108: Villa
-    3300110: H1 (10)
-    3300112: H1 (9)
-    3300114: H2 (10)
-    3300116: H2 (11)
-    3300118: H3 (5)
-    3300120: H4 (6)
-    3300122: H4 (7)
-    3300124: H5 (11)
-    3300126: H6 (11)
-    3300128: H6 (12)
-    3300130: Mesh (2)
-    4300000: H3
-    4300002: H6
-    4300004: H5
-    4300006: H2
-    4300008: Mesh
-    4300010: H4
-    4300012: H4 (2)
-    4300014: H5 (2)
-    4300016: H1
-    4300018: Triumphial_Arch
-    4300020: H1 (2)
-    4300022: H2 (2)
-    4300024: H2 (3)
-    4300026: H2 (4)
-    4300028: H2 (5)
-    4300030: H2 (6)
-    4300032: H6 (2)
-    4300034: H3 (2)
-    4300036: H5 (3)
-    4300038: H5 (4)
-    4300040: H5 (5)
-    4300042: Louvre
-    4300044: Theater
-    4300046: H6 (3)
-    4300048: H5 (6)
-    4300050: H1 (3)
-    4300052: H1 (4)
-    4300054: Eiffel_Tower
-    4300056: H3 (3)
-    4300058: H6 (4)
-    4300060: H5 (7)
-    4300062: H2 (7)
-    4300064: H4 (3)
-    4300066: H6 (5)
-    4300068: Cafe
-    4300070: H6 (6)
-    4300072: Museum
-    4300074: H1 (5)
-    4300076: H2 (8)
-    4300078: School
-    4300080: H6 (7)
-    4300082: H4 (4)
-    4300084: H4 (5)
-    4300086: H5 (8)
-    4300088: H1 (6)
-    4300090: H6 (8)
-    4300092: H6 (9)
-    4300094: H5 (9)
-    4300096: Villa
-    4300098: H3 (4)
-    4300100: H6 (10)
-    4300102: H5 (10)
-    4300104: H1 (7)
-    4300106: H1 (8)
-    4300108: H2 (9)
-    4300110: Mesh (2)
-    4300112: H2 (10)
-    4300114: H4 (6)
-    4300116: H4 (7)
-    4300118: H6 (11)
-    4300120: H3 (5)
-    4300122: H6 (12)
-    4300124: H5 (11)
-    4300126: H1 (9)
-    4300128: H1 (10)
-    4300130: H2 (11)
-    2186277476908879412: ImportLogs
+  serializedVersion: 22200
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Cafe
+  - first:
+      1: 100002
+    second: Eiffel_Tower
+  - first:
+      1: 100004
+    second: H1
+  - first:
+      1: 100006
+    second: H1 (2)
+  - first:
+      1: 100008
+    second: H1 (3)
+  - first:
+      1: 100010
+    second: H1 (4)
+  - first:
+      1: 100012
+    second: H1 (5)
+  - first:
+      1: 100014
+    second: H1 (6)
+  - first:
+      1: 100016
+    second: H1 (7)
+  - first:
+      1: 100018
+    second: H1 (8)
+  - first:
+      1: 100020
+    second: H2
+  - first:
+      1: 100022
+    second: H2 (2)
+  - first:
+      1: 100024
+    second: H2 (3)
+  - first:
+      1: 100026
+    second: H2 (4)
+  - first:
+      1: 100028
+    second: H2 (5)
+  - first:
+      1: 100030
+    second: H2 (6)
+  - first:
+      1: 100032
+    second: H2 (7)
+  - first:
+      1: 100034
+    second: H2 (8)
+  - first:
+      1: 100036
+    second: H2 (9)
+  - first:
+      1: 100038
+    second: H3
+  - first:
+      1: 100040
+    second: H3 (2)
+  - first:
+      1: 100042
+    second: H3 (3)
+  - first:
+      1: 100044
+    second: H3 (4)
+  - first:
+      1: 100046
+    second: H4
+  - first:
+      1: 100048
+    second: H4 (2)
+  - first:
+      1: 100050
+    second: H4 (3)
+  - first:
+      1: 100052
+    second: H4 (4)
+  - first:
+      1: 100054
+    second: H4 (5)
+  - first:
+      1: 100056
+    second: H5
+  - first:
+      1: 100058
+    second: H5 (10)
+  - first:
+      1: 100060
+    second: H5 (2)
+  - first:
+      1: 100062
+    second: H5 (3)
+  - first:
+      1: 100064
+    second: H5 (4)
+  - first:
+      1: 100066
+    second: H5 (5)
+  - first:
+      1: 100068
+    second: H5 (6)
+  - first:
+      1: 100070
+    second: H5 (7)
+  - first:
+      1: 100072
+    second: H5 (8)
+  - first:
+      1: 100074
+    second: H5 (9)
+  - first:
+      1: 100076
+    second: H6
+  - first:
+      1: 100078
+    second: H6 (10)
+  - first:
+      1: 100080
+    second: H6 (2)
+  - first:
+      1: 100082
+    second: H6 (3)
+  - first:
+      1: 100084
+    second: H6 (4)
+  - first:
+      1: 100086
+    second: H6 (5)
+  - first:
+      1: 100088
+    second: H6 (6)
+  - first:
+      1: 100090
+    second: H6 (7)
+  - first:
+      1: 100092
+    second: H6 (8)
+  - first:
+      1: 100094
+    second: H6 (9)
+  - first:
+      1: 100096
+    second: Louvre
+  - first:
+      1: 100098
+    second: //RootNode
+  - first:
+      1: 100100
+    second: Mesh
+  - first:
+      1: 100102
+    second: Museum
+  - first:
+      1: 100104
+    second: School
+  - first:
+      1: 100106
+    second: Theater
+  - first:
+      1: 100108
+    second: Triumphial_Arch
+  - first:
+      1: 100110
+    second: Villa
+  - first:
+      1: 100112
+    second: H1 (10)
+  - first:
+      1: 100114
+    second: H1 (9)
+  - first:
+      1: 100116
+    second: H2 (10)
+  - first:
+      1: 100118
+    second: H2 (11)
+  - first:
+      1: 100120
+    second: H3 (5)
+  - first:
+      1: 100122
+    second: H4 (6)
+  - first:
+      1: 100124
+    second: H4 (7)
+  - first:
+      1: 100126
+    second: H5 (11)
+  - first:
+      1: 100128
+    second: H6 (11)
+  - first:
+      1: 100130
+    second: H6 (12)
+  - first:
+      1: 100132
+    second: Mesh (2)
+  - first:
+      4: 400000
+    second: Cafe
+  - first:
+      4: 400002
+    second: Eiffel_Tower
+  - first:
+      4: 400004
+    second: H1
+  - first:
+      4: 400006
+    second: H1 (2)
+  - first:
+      4: 400008
+    second: H1 (3)
+  - first:
+      4: 400010
+    second: H1 (4)
+  - first:
+      4: 400012
+    second: H1 (5)
+  - first:
+      4: 400014
+    second: H1 (6)
+  - first:
+      4: 400016
+    second: H1 (7)
+  - first:
+      4: 400018
+    second: H1 (8)
+  - first:
+      4: 400020
+    second: H2
+  - first:
+      4: 400022
+    second: H2 (2)
+  - first:
+      4: 400024
+    second: H2 (3)
+  - first:
+      4: 400026
+    second: H2 (4)
+  - first:
+      4: 400028
+    second: H2 (5)
+  - first:
+      4: 400030
+    second: H2 (6)
+  - first:
+      4: 400032
+    second: H2 (7)
+  - first:
+      4: 400034
+    second: H2 (8)
+  - first:
+      4: 400036
+    second: H2 (9)
+  - first:
+      4: 400038
+    second: H3
+  - first:
+      4: 400040
+    second: H3 (2)
+  - first:
+      4: 400042
+    second: H3 (3)
+  - first:
+      4: 400044
+    second: H3 (4)
+  - first:
+      4: 400046
+    second: H4
+  - first:
+      4: 400048
+    second: H4 (2)
+  - first:
+      4: 400050
+    second: H4 (3)
+  - first:
+      4: 400052
+    second: H4 (4)
+  - first:
+      4: 400054
+    second: H4 (5)
+  - first:
+      4: 400056
+    second: H5
+  - first:
+      4: 400058
+    second: H5 (10)
+  - first:
+      4: 400060
+    second: H5 (2)
+  - first:
+      4: 400062
+    second: H5 (3)
+  - first:
+      4: 400064
+    second: H5 (4)
+  - first:
+      4: 400066
+    second: H5 (5)
+  - first:
+      4: 400068
+    second: H5 (6)
+  - first:
+      4: 400070
+    second: H5 (7)
+  - first:
+      4: 400072
+    second: H5 (8)
+  - first:
+      4: 400074
+    second: H5 (9)
+  - first:
+      4: 400076
+    second: H6
+  - first:
+      4: 400078
+    second: H6 (10)
+  - first:
+      4: 400080
+    second: H6 (2)
+  - first:
+      4: 400082
+    second: H6 (3)
+  - first:
+      4: 400084
+    second: H6 (4)
+  - first:
+      4: 400086
+    second: H6 (5)
+  - first:
+      4: 400088
+    second: H6 (6)
+  - first:
+      4: 400090
+    second: H6 (7)
+  - first:
+      4: 400092
+    second: H6 (8)
+  - first:
+      4: 400094
+    second: H6 (9)
+  - first:
+      4: 400096
+    second: Louvre
+  - first:
+      4: 400098
+    second: //RootNode
+  - first:
+      4: 400100
+    second: Mesh
+  - first:
+      4: 400102
+    second: Museum
+  - first:
+      4: 400104
+    second: School
+  - first:
+      4: 400106
+    second: Theater
+  - first:
+      4: 400108
+    second: Triumphial_Arch
+  - first:
+      4: 400110
+    second: Villa
+  - first:
+      4: 400112
+    second: H1 (10)
+  - first:
+      4: 400114
+    second: H1 (9)
+  - first:
+      4: 400116
+    second: H2 (10)
+  - first:
+      4: 400118
+    second: H2 (11)
+  - first:
+      4: 400120
+    second: H3 (5)
+  - first:
+      4: 400122
+    second: H4 (6)
+  - first:
+      4: 400124
+    second: H4 (7)
+  - first:
+      4: 400126
+    second: H5 (11)
+  - first:
+      4: 400128
+    second: H6 (11)
+  - first:
+      4: 400130
+    second: H6 (12)
+  - first:
+      4: 400132
+    second: Mesh (2)
+  - first:
+      23: 2300000
+    second: Cafe
+  - first:
+      23: 2300002
+    second: Eiffel_Tower
+  - first:
+      23: 2300004
+    second: H1
+  - first:
+      23: 2300006
+    second: H1 (2)
+  - first:
+      23: 2300008
+    second: H1 (3)
+  - first:
+      23: 2300010
+    second: H1 (4)
+  - first:
+      23: 2300012
+    second: H1 (5)
+  - first:
+      23: 2300014
+    second: H1 (6)
+  - first:
+      23: 2300016
+    second: H1 (7)
+  - first:
+      23: 2300018
+    second: H1 (8)
+  - first:
+      23: 2300020
+    second: H2
+  - first:
+      23: 2300022
+    second: H2 (2)
+  - first:
+      23: 2300024
+    second: H2 (3)
+  - first:
+      23: 2300026
+    second: H2 (4)
+  - first:
+      23: 2300028
+    second: H2 (5)
+  - first:
+      23: 2300030
+    second: H2 (6)
+  - first:
+      23: 2300032
+    second: H2 (7)
+  - first:
+      23: 2300034
+    second: H2 (8)
+  - first:
+      23: 2300036
+    second: H2 (9)
+  - first:
+      23: 2300038
+    second: H3
+  - first:
+      23: 2300040
+    second: H3 (2)
+  - first:
+      23: 2300042
+    second: H3 (3)
+  - first:
+      23: 2300044
+    second: H3 (4)
+  - first:
+      23: 2300046
+    second: H4
+  - first:
+      23: 2300048
+    second: H4 (2)
+  - first:
+      23: 2300050
+    second: H4 (3)
+  - first:
+      23: 2300052
+    second: H4 (4)
+  - first:
+      23: 2300054
+    second: H4 (5)
+  - first:
+      23: 2300056
+    second: H5
+  - first:
+      23: 2300058
+    second: H5 (10)
+  - first:
+      23: 2300060
+    second: H5 (2)
+  - first:
+      23: 2300062
+    second: H5 (3)
+  - first:
+      23: 2300064
+    second: H5 (4)
+  - first:
+      23: 2300066
+    second: H5 (5)
+  - first:
+      23: 2300068
+    second: H5 (6)
+  - first:
+      23: 2300070
+    second: H5 (7)
+  - first:
+      23: 2300072
+    second: H5 (8)
+  - first:
+      23: 2300074
+    second: H5 (9)
+  - first:
+      23: 2300076
+    second: H6
+  - first:
+      23: 2300078
+    second: H6 (10)
+  - first:
+      23: 2300080
+    second: H6 (2)
+  - first:
+      23: 2300082
+    second: H6 (3)
+  - first:
+      23: 2300084
+    second: H6 (4)
+  - first:
+      23: 2300086
+    second: H6 (5)
+  - first:
+      23: 2300088
+    second: H6 (6)
+  - first:
+      23: 2300090
+    second: H6 (7)
+  - first:
+      23: 2300092
+    second: H6 (8)
+  - first:
+      23: 2300094
+    second: H6 (9)
+  - first:
+      23: 2300096
+    second: Louvre
+  - first:
+      23: 2300098
+    second: Mesh
+  - first:
+      23: 2300100
+    second: Museum
+  - first:
+      23: 2300102
+    second: School
+  - first:
+      23: 2300104
+    second: Theater
+  - first:
+      23: 2300106
+    second: Triumphial_Arch
+  - first:
+      23: 2300108
+    second: Villa
+  - first:
+      23: 2300110
+    second: H1 (10)
+  - first:
+      23: 2300112
+    second: H1 (9)
+  - first:
+      23: 2300114
+    second: H2 (10)
+  - first:
+      23: 2300116
+    second: H2 (11)
+  - first:
+      23: 2300118
+    second: H3 (5)
+  - first:
+      23: 2300120
+    second: H4 (6)
+  - first:
+      23: 2300122
+    second: H4 (7)
+  - first:
+      23: 2300124
+    second: H5 (11)
+  - first:
+      23: 2300126
+    second: H6 (11)
+  - first:
+      23: 2300128
+    second: H6 (12)
+  - first:
+      23: 2300130
+    second: Mesh (2)
+  - first:
+      33: 3300000
+    second: Cafe
+  - first:
+      33: 3300002
+    second: Eiffel_Tower
+  - first:
+      33: 3300004
+    second: H1
+  - first:
+      33: 3300006
+    second: H1 (2)
+  - first:
+      33: 3300008
+    second: H1 (3)
+  - first:
+      33: 3300010
+    second: H1 (4)
+  - first:
+      33: 3300012
+    second: H1 (5)
+  - first:
+      33: 3300014
+    second: H1 (6)
+  - first:
+      33: 3300016
+    second: H1 (7)
+  - first:
+      33: 3300018
+    second: H1 (8)
+  - first:
+      33: 3300020
+    second: H2
+  - first:
+      33: 3300022
+    second: H2 (2)
+  - first:
+      33: 3300024
+    second: H2 (3)
+  - first:
+      33: 3300026
+    second: H2 (4)
+  - first:
+      33: 3300028
+    second: H2 (5)
+  - first:
+      33: 3300030
+    second: H2 (6)
+  - first:
+      33: 3300032
+    second: H2 (7)
+  - first:
+      33: 3300034
+    second: H2 (8)
+  - first:
+      33: 3300036
+    second: H2 (9)
+  - first:
+      33: 3300038
+    second: H3
+  - first:
+      33: 3300040
+    second: H3 (2)
+  - first:
+      33: 3300042
+    second: H3 (3)
+  - first:
+      33: 3300044
+    second: H3 (4)
+  - first:
+      33: 3300046
+    second: H4
+  - first:
+      33: 3300048
+    second: H4 (2)
+  - first:
+      33: 3300050
+    second: H4 (3)
+  - first:
+      33: 3300052
+    second: H4 (4)
+  - first:
+      33: 3300054
+    second: H4 (5)
+  - first:
+      33: 3300056
+    second: H5
+  - first:
+      33: 3300058
+    second: H5 (10)
+  - first:
+      33: 3300060
+    second: H5 (2)
+  - first:
+      33: 3300062
+    second: H5 (3)
+  - first:
+      33: 3300064
+    second: H5 (4)
+  - first:
+      33: 3300066
+    second: H5 (5)
+  - first:
+      33: 3300068
+    second: H5 (6)
+  - first:
+      33: 3300070
+    second: H5 (7)
+  - first:
+      33: 3300072
+    second: H5 (8)
+  - first:
+      33: 3300074
+    second: H5 (9)
+  - first:
+      33: 3300076
+    second: H6
+  - first:
+      33: 3300078
+    second: H6 (10)
+  - first:
+      33: 3300080
+    second: H6 (2)
+  - first:
+      33: 3300082
+    second: H6 (3)
+  - first:
+      33: 3300084
+    second: H6 (4)
+  - first:
+      33: 3300086
+    second: H6 (5)
+  - first:
+      33: 3300088
+    second: H6 (6)
+  - first:
+      33: 3300090
+    second: H6 (7)
+  - first:
+      33: 3300092
+    second: H6 (8)
+  - first:
+      33: 3300094
+    second: H6 (9)
+  - first:
+      33: 3300096
+    second: Louvre
+  - first:
+      33: 3300098
+    second: Mesh
+  - first:
+      33: 3300100
+    second: Museum
+  - first:
+      33: 3300102
+    second: School
+  - first:
+      33: 3300104
+    second: Theater
+  - first:
+      33: 3300106
+    second: Triumphial_Arch
+  - first:
+      33: 3300108
+    second: Villa
+  - first:
+      33: 3300110
+    second: H1 (10)
+  - first:
+      33: 3300112
+    second: H1 (9)
+  - first:
+      33: 3300114
+    second: H2 (10)
+  - first:
+      33: 3300116
+    second: H2 (11)
+  - first:
+      33: 3300118
+    second: H3 (5)
+  - first:
+      33: 3300120
+    second: H4 (6)
+  - first:
+      33: 3300122
+    second: H4 (7)
+  - first:
+      33: 3300124
+    second: H5 (11)
+  - first:
+      33: 3300126
+    second: H6 (11)
+  - first:
+      33: 3300128
+    second: H6 (12)
+  - first:
+      33: 3300130
+    second: Mesh (2)
+  - first:
+      43: 4300000
+    second: H3
+  - first:
+      43: 4300002
+    second: H6
+  - first:
+      43: 4300004
+    second: H5
+  - first:
+      43: 4300006
+    second: H2
+  - first:
+      43: 4300008
+    second: Mesh
+  - first:
+      43: 4300010
+    second: H4
+  - first:
+      43: 4300012
+    second: H4 (2)
+  - first:
+      43: 4300014
+    second: H5 (2)
+  - first:
+      43: 4300016
+    second: H1
+  - first:
+      43: 4300018
+    second: Triumphial_Arch
+  - first:
+      43: 4300020
+    second: H1 (2)
+  - first:
+      43: 4300022
+    second: H2 (2)
+  - first:
+      43: 4300024
+    second: H2 (3)
+  - first:
+      43: 4300026
+    second: H2 (4)
+  - first:
+      43: 4300028
+    second: H2 (5)
+  - first:
+      43: 4300030
+    second: H2 (6)
+  - first:
+      43: 4300032
+    second: H6 (2)
+  - first:
+      43: 4300034
+    second: H3 (2)
+  - first:
+      43: 4300036
+    second: H5 (3)
+  - first:
+      43: 4300038
+    second: H5 (4)
+  - first:
+      43: 4300040
+    second: H5 (5)
+  - first:
+      43: 4300042
+    second: Louvre
+  - first:
+      43: 4300044
+    second: Theater
+  - first:
+      43: 4300046
+    second: H6 (3)
+  - first:
+      43: 4300048
+    second: H5 (6)
+  - first:
+      43: 4300050
+    second: H1 (3)
+  - first:
+      43: 4300052
+    second: H1 (4)
+  - first:
+      43: 4300054
+    second: Eiffel_Tower
+  - first:
+      43: 4300056
+    second: H3 (3)
+  - first:
+      43: 4300058
+    second: H6 (4)
+  - first:
+      43: 4300060
+    second: H5 (7)
+  - first:
+      43: 4300062
+    second: H2 (7)
+  - first:
+      43: 4300064
+    second: H4 (3)
+  - first:
+      43: 4300066
+    second: H6 (5)
+  - first:
+      43: 4300068
+    second: Cafe
+  - first:
+      43: 4300070
+    second: H6 (6)
+  - first:
+      43: 4300072
+    second: Museum
+  - first:
+      43: 4300074
+    second: H1 (5)
+  - first:
+      43: 4300076
+    second: H2 (8)
+  - first:
+      43: 4300078
+    second: School
+  - first:
+      43: 4300080
+    second: H6 (7)
+  - first:
+      43: 4300082
+    second: H4 (4)
+  - first:
+      43: 4300084
+    second: H4 (5)
+  - first:
+      43: 4300086
+    second: H5 (8)
+  - first:
+      43: 4300088
+    second: H1 (6)
+  - first:
+      43: 4300090
+    second: H6 (8)
+  - first:
+      43: 4300092
+    second: H6 (9)
+  - first:
+      43: 4300094
+    second: H5 (9)
+  - first:
+      43: 4300096
+    second: Villa
+  - first:
+      43: 4300098
+    second: H3 (4)
+  - first:
+      43: 4300100
+    second: H6 (10)
+  - first:
+      43: 4300102
+    second: H5 (10)
+  - first:
+      43: 4300104
+    second: H1 (7)
+  - first:
+      43: 4300106
+    second: H1 (8)
+  - first:
+      43: 4300108
+    second: H2 (9)
+  - first:
+      43: 4300110
+    second: Mesh (2)
+  - first:
+      43: 4300112
+    second: H2 (10)
+  - first:
+      43: 4300114
+    second: H4 (6)
+  - first:
+      43: 4300116
+    second: H4 (7)
+  - first:
+      43: 4300118
+    second: H6 (11)
+  - first:
+      43: 4300120
+    second: H3 (5)
+  - first:
+      43: 4300122
+    second: H6 (12)
+  - first:
+      43: 4300124
+    second: H5 (11)
+  - first:
+      43: 4300126
+    second: H1 (9)
+  - first:
+      43: 4300128
+    second: H1 (10)
+  - first:
+      43: 4300130
+    second: H2 (11)
+  - first:
+      41386430: 2186277476908879412
+    second: ImportLogs
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -353,8 +1019,8 @@ ModelImporter:
       name: b01_school_ext_Low
     second: {fileID: 2100000, guid: 8a85770734a717f41bad245306a38c1e, type: 2}
   materials:
-    importMaterials: 1
-    materialName: 0
+    materialImportMode: 1
+    materialName: 1
     materialSearch: 1
     materialLocation: 0
   animations:
@@ -362,9 +1028,8 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -385,34 +1050,49 @@ ModelImporter:
     globalScale: 1
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 0
     importBlendShapes: 1
     importCameras: 0
     importLights: 0
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 0
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -422,13 +1102,19 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 0
   humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

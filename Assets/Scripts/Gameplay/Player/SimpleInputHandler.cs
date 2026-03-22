@@ -31,7 +31,28 @@ namespace SledSurfers.Gameplay.Player
         private bool _wasPressing;
 
         // === Steering ===
-        public float HorizontalInput => _enabled ? Input.GetAxis("Horizontal") : 0f;
+        public float HorizontalInput
+        {
+            get
+            {
+                if (!_enabled) return 0f;
+
+                // Keyboard takes priority
+                float keyboard = Input.GetAxis("Horizontal");
+                if (Mathf.Abs(keyboard) > 0.01f)
+                    return keyboard;
+
+                // Mouse/touch: use pointer X offset from screen center
+                if (GetPointerPressed() && !_isDragging)
+                {
+                    Vector2 pos = GetPointerPosition();
+                    float screenCenterX = Screen.width * 0.5f;
+                    return Mathf.Clamp((pos.x - screenCenterX) / (screenCenterX * 0.5f), -1f, 1f);
+                }
+
+                return 0f;
+            }
+        }
 
         // === Drag ===
         public bool DragStarted => _enabled && _dragStartedThisFrame;

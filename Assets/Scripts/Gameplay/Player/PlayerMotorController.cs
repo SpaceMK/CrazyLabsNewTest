@@ -1,6 +1,8 @@
 using System;
 using SledSurfers.Core.Interfaces;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SledSurfers.Gameplay.Player
 {
@@ -86,6 +88,31 @@ namespace SledSurfers.Gameplay.Player
             {
                 _lastReportedSpeed = speed;
                 OnSpeedChanged?.Invoke(speed);
+            }
+        }
+
+        public void AlignToSurface(float deltaTime)
+        {
+            Vector3 rayOrigin = _rigidbody.transform.position + Vector3.up * 0.5f;
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 2f))
+            {
+                Vector3 projectedForward = Vector3.ProjectOnPlane(
+                    _rigidbody.linearVelocity.magnitude > 0.5f
+                        ? _rigidbody.linearVelocity.normalized
+                        : _rigidbody.transform.forward,
+                    hit.normal
+                ).normalized;
+
+                if (projectedForward.sqrMagnitude > 0.001f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(projectedForward, hit.normal);
+                     _rigidbody.transform.rotation = Quaternion.Slerp(
+                        _rigidbody.transform.rotation,
+                        targetRotation,
+                        10f * deltaTime
+                    );
+                }
             }
         }
 

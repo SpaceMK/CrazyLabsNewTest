@@ -16,6 +16,7 @@ namespace SledSurfers.Core.Interfaces
         event Action OnHalted;
 
         // === Commands (controller has authority) ===
+        void AlignToSurface(float deltaTime);
         void Launch(Vector3 force);
         void Steer(float horizontalInput, float deltaTime);
         void ApplyDownhillForce(float deltaTime);
