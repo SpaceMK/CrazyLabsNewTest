@@ -13,43 +13,43 @@ MonoBehaviour:
   m_Name: UpgradeConfig
   m_EditorClassIdentifier: 
   _upgrades:
-  - Id: 
-    DisplayName: 
-    Description: 
+  - Id: launch_power
+    DisplayName: Launch Power
+    Description: Increases initial launch force
     Icon: {fileID: 0}
-    MaxLevel: 0
-    BaseCost: 0
-    CostMultiplier: 0
-    BaseValue: 0
-    ValuePerLevel: 0
+    MaxLevel: 10
+    BaseCost: 10
+    CostMultiplier: 1.5
+    BaseValue: 15
+    ValuePerLevel: 3
     StatType: 0
-  - Id: 
-    DisplayName: 
-    Description: 
+  - Id: max_speed
+    DisplayName: Max Speed
+    Description: Increases maximum speed
     Icon: {fileID: 0}
-    MaxLevel: 0
-    BaseCost: 0
-    CostMultiplier: 0
-    BaseValue: 0
-    ValuePerLevel: 0
+    MaxLevel: 10
+    BaseCost: 10
+    CostMultiplier: 1.5
+    BaseValue: 20
+    ValuePerLevel: 2
     StatType: 1
-  - Id: 
-    DisplayName: 
-    Description: 
+  - Id: steering
+    DisplayName: Steering
+    Description: Increases steering responsiveness
     Icon: {fileID: 0}
-    MaxLevel: 0
-    BaseCost: 0
-    CostMultiplier: 0
-    BaseValue: 0
-    ValuePerLevel: 0
+    MaxLevel: 10
+    BaseCost: 10
+    CostMultiplier: 1.5
+    BaseValue: 8
+    ValuePerLevel: 1.5
     StatType: 2
-  - Id: 
-    DisplayName: 
-    Description: 
+  - Id: coin_value
+    DisplayName: Gift Value
+    Description: Increases value of collected gifts
     Icon: {fileID: 0}
-    MaxLevel: 0
-    BaseCost: 0
-    CostMultiplier: 0
-    BaseValue: 0
-    ValuePerLevel: 0
+    MaxLevel: 10
+    BaseCost: 10
+    CostMultiplier: 1.5
+    BaseValue: 1
+    ValuePerLevel: 1
     StatType: 3

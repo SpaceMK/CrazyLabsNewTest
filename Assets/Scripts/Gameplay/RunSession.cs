@@ -9,15 +9,17 @@ using UnityEngine;
 namespace SledSurfers.Gameplay
 {
     /// <summary>
-    /// Manages a single gameplay run: launch → charge → run → end.
+    /// Manages a single gameplay run: drag-to-launch → run → end.
     /// 
     /// Extracted from GameplayFlow to satisfy SRP.
     /// GameplayFlow handles menu navigation and session lifecycle.
     /// RunSession handles the active gameplay loop and scoring.
     /// 
-    /// Trade-off: Adds one more class to the dependency graph, but each class
-    /// now has a single reason to change. RunSession changes for gameplay mechanics;
-    /// GameplayFlow changes for navigation flow.
+    /// Slingshot flow:
+    /// 1. WaitingToLaunch: player touches/clicks the screen → StartDrag
+    /// 2. Dragging: player holds and drags → UpdateDrag with screen delta each frame
+    /// 3. Player releases → Release computes force vector → Motor.Launch
+    /// 4. Running: normal gameplay until crash or momentum lost.
     /// </summary>
     public sealed class RunSession : IDisposable
     {
@@ -33,7 +35,7 @@ namespace SledSurfers.Gameplay
         {
             Inactive,
             WaitingToLaunch,
-            Charging,
+            Dragging,
             Running,
             Ended
         }
@@ -73,7 +75,7 @@ namespace SledSurfers.Gameplay
             _input.Enable();
             CurrentPhase = Phase.WaitingToLaunch;
 
-            Debug.Log("[RunSession] Ready to launch.");
+            Debug.Log("[RunSession] Ready to launch. Drag to aim.");
         }
 
         /// <summary>
@@ -86,8 +88,8 @@ namespace SledSurfers.Gameplay
                 case Phase.WaitingToLaunch:
                     TickWaitingToLaunch();
                     break;
-                case Phase.Charging:
-                    TickCharging();
+                case Phase.Dragging:
+                    TickDragging();
                     break;
                 case Phase.Running:
                     TickRunning();
@@ -102,21 +104,35 @@ namespace SledSurfers.Gameplay
 
         private void TickWaitingToLaunch()
         {
-            if (_input.LaunchPressed)
+            if (_input.DragStarted)
             {
-                _player.Slingshot.StartCharging();
-                CurrentPhase = Phase.Charging;
-                Debug.Log("[RunSession] Charging...");
+                _player.Slingshot.StartDrag();
+                CurrentPhase = Phase.Dragging;
+                Debug.Log("[RunSession] Dragging slingshot...");
             }
         }
 
-        private void TickCharging()
+        private void TickDragging()
         {
-            _player.Slingshot.UpdateCharge(Time.deltaTime);
+            // Always feed the current drag delta — including on the release frame,
+            // so the slingshot has the final pull values before Release() is called.
+            Vector2 delta = _input.DragDelta;
+            _player.Slingshot.UpdateDrag(delta);
 
-            if (_input.LaunchReleased)
+            if (_input.DragEnded)
             {
+                Debug.Log($"[RunSession] Release drag delta: {delta}, Pull: {_player.Slingshot.PullPercent:P0}, Angle: {_player.Slingshot.LaunchAngle:F1}°");
+
                 Vector3 force = _player.Slingshot.Release();
+
+                if (force.sqrMagnitude < 0.01f)
+                {
+                    _player.Slingshot.Reset();
+                    CurrentPhase = Phase.WaitingToLaunch;
+                    Debug.Log("[RunSession] Pull too weak, back to waiting.");
+                    return;
+                }
+
                 _player.Motor.Launch(force);
                 _player.MomentumTracker.StartTracking();
 

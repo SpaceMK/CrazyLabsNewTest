@@ -10,10 +10,14 @@ namespace SledSurfers.Gameplay.Player
     /// Facade MonoBehaviour that lives on the Player GameObject.
     /// Composes runtime instances of motor, slingshot, momentum tracker, etc.
     /// 
-    /// Sub-systems communicate via events - no need to route through GameplayFlow.
+    /// Sub-systems communicate via events — no need to route through GameplayFlow.
     /// 
     /// ICoinDespawner is injected via VContainer [Inject] so we avoid
     /// FindFirstObjectByType (which defeated the DI architecture).
+    /// 
+    /// Ticks the IInputHandler each frame so SimpleInputHandler can track
+    /// drag state from mouse/touch. This is necessary because SimpleInputHandler
+    /// is a plain C# class (not a MonoBehaviour) and needs a frame-driven update.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(PlayerCollisionHandler))]
@@ -29,6 +33,7 @@ namespace SledSurfers.Gameplay.Player
         private MomentumTracker _momentumTracker;
 
         private ICoinDespawner _coinDespawner;
+        private IInputHandler _input;
         private bool _isInitialized;
 
         // Expose interfaces for external consumers
@@ -41,10 +46,6 @@ namespace SledSurfers.Gameplay.Player
 
         public float FinalDistance = 0f;
 
-        /// <summary>
-        /// VContainer injects the ICoinDespawner here.
-        /// Called automatically before Initialize().
-        /// </summary>
         [Inject]
         public void Construct(ICoinDespawner coinDespawner)
         {
@@ -53,7 +54,8 @@ namespace SledSurfers.Gameplay.Player
 
         public void Initialize(GameSettings settings, Data.Models.PlayerData playerData, IInputHandler input)
         {
-            // Get components (always needed)
+            _input = input;
+
             if (_rigidbody == null)
                 _rigidbody = GetComponent<Rigidbody>();
             if (_collisionHandler == null)
@@ -61,13 +63,11 @@ namespace SledSurfers.Gameplay.Player
             if (_physicsController == null)
                 _physicsController = GetComponent<PlayerPhysicsController>();
 
-            // Configure rigidbody defaults
             _rigidbody.isKinematic = true;
             _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 
-            // First time initialization - create subsystems
             if (!_isInitialized)
             {
                 _motor = new PlayerMotor(
@@ -104,6 +104,17 @@ namespace SledSurfers.Gameplay.Player
         private void Start()
         {
             _startingPosition = transform.position;
+        }
+
+        private void Update()
+        {
+            // Tick the input handler so it can track drag state.
+            // SimpleInputHandler is a plain C# class that reads Input.*
+            // each frame — it needs this manual tick.
+            if (_input is SimpleInputHandler simpleInput)
+            {
+                simpleInput.Tick();
+            }
         }
 
         public void CalculateDistance()

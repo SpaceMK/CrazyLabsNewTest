@@ -14,18 +14,37 @@ namespace SledSurfers.Gameplay.Level
     /// - ILevelManager: so GameplayFlow can reset coins without knowing this concrete type.
     /// - ICoinDespawner: so PlayerCollisionHandler can despawn coins without a direct dependency.
     /// 
+    /// Spawning strategy:
+    /// Generates random (X, Z) candidates within bounds, then raycasts downward to find
+    /// the actual ground surface. Coins are placed at surface + _coinHeight offset.
+    /// This works on any geometry — flat, sloped, zigzag chunks, or uneven terrain.
+    /// Positions over gaps (raycast miss) are discarded automatically.
+    /// 
+    /// Dispersion checks use XZ distance (ignoring Y) so spacing is consistent
+    /// regardless of surface height variations.
+    /// 
     /// NOTE: Initialize() only wires dependencies — it does NOT spawn.
-    /// Spawning is triggered by GameplayFlow.Start() via ILevelManager.Reset(),
-    /// which runs after all [Inject] methods complete, guaranteeing pools are ready.
+    /// Spawning is triggered by GameplayFlow.Start() via ILevelManager.Reset().
     /// </summary>
     public class CoinLevelManager : MonoBehaviour, ILevelManager, ICoinDespawner
     {
-        [Header("Spawn Bounds")]
-        [SerializeField] private Vector3 _minBounds = new(-5f, 1f, 10f);
-        [SerializeField] private Vector3 _maxBounds = new(5f, 1f, 200f);
+        [Header("Spawn Bounds (XZ area to scatter within)")]
+        [SerializeField] private float _minX = -5f;
+        [SerializeField] private float _maxX = 5f;
+        [SerializeField] private float _minZ = 10f;
+        [SerializeField] private float _maxZ = 200f;
+
+        [Header("Raycast")]
+        [Tooltip("Height from which to raycast downward to find the ground.")]
+        [SerializeField] private float _raycastOriginY = 50f;
+        [Tooltip("Maximum raycast distance.")]
+        [SerializeField] private float _raycastDistance = 100f;
+        [Tooltip("Layer mask for ground surfaces. Set this to your ground layer.")]
+        [SerializeField] private LayerMask _groundLayer = ~0;
 
         [Header("Settings")]
         [SerializeField] private int _coinCount = 30;
+        [Tooltip("Height above the ground surface where coins hover.")]
         [SerializeField] private float _coinHeight = 1f;
 
         [Header("Dispersion")]
@@ -60,11 +79,9 @@ namespace SledSurfers.Gameplay.Level
 
             for (int i = 0; i < _coinCount; i++)
             {
-                Vector3? position = FindValidPosition();
-
-                if (position.HasValue)
+                if (TryFindValidPosition(out Vector3 position))
                 {
-                    SpawnCoin(position.Value);
+                    SpawnCoin(position);
                     spawned++;
                 }
             }
@@ -72,56 +89,59 @@ namespace SledSurfers.Gameplay.Level
             Debug.Log($"[CoinLevelManager] Spawned {spawned}/{_coinCount} coins.");
         }
 
-        private Vector3? FindValidPosition()
+        private bool TryFindValidPosition(out Vector3 position)
         {
             for (int attempt = 0; attempt < _maxSpawnAttempts; attempt++)
             {
-                Vector3 candidate = GetRandomPosition();
+                float x = Random.Range(_minX, _maxX);
+                float z = Random.Range(_minZ, _maxZ);
 
-                if (IsValidPosition(candidate))
+                Vector3 rayOrigin = new Vector3(x, _raycastOriginY, z);
+
+                if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, _raycastDistance, _groundLayer))
                 {
-                    return candidate;
+                    // Place coin at surface height + hover offset along surface normal
+                    Vector3 candidate = hit.point + hit.normal * _coinHeight;
+
+                    if (IsValidPosition(candidate))
+                    {
+                        position = candidate;
+                        return true;
+                    }
                 }
             }
 
-            return null;
-        }
-
-        private Vector3 GetRandomPosition()
-        {
-            float x = Random.Range(_minBounds.x, _maxBounds.x);
-            float z = Random.Range(_minBounds.z, _maxBounds.z);
-
-            return new Vector3(x, _coinHeight, z);
+            position = Vector3.zero;
+            return false;
         }
 
         private bool IsValidPosition(Vector3 position)
         {
+            // Check distance to other coins (XZ only for consistent spacing)
             foreach (var existing in _spawnedPositions)
             {
-                float distance = Vector3.Distance(
-                    new Vector3(position.x, 0, position.z),
-                    new Vector3(existing.x, 0, existing.z)
-                );
+                float dx = position.x - existing.x;
+                float dz = position.z - existing.z;
+                float distXZ = Mathf.Sqrt(dx * dx + dz * dz);
 
-                if (distance < _minDistanceBetweenCoins)
+                if (distXZ < _minDistanceBetweenCoins)
                 {
                     return false;
                 }
             }
 
+            // Check distance to obstacles (XZ only)
             if (_obstaclePositionProvider != null)
             {
                 var obstaclePositions = _obstaclePositionProvider.GetOccupiedPositions();
 
                 foreach (var obstaclePos in obstaclePositions)
                 {
-                    float distance = Vector3.Distance(
-                        new Vector3(position.x, 0, position.z),
-                        new Vector3(obstaclePos.x, 0, obstaclePos.z)
-                    );
+                    float dx = position.x - obstaclePos.x;
+                    float dz = position.z - obstaclePos.z;
+                    float distXZ = Mathf.Sqrt(dx * dx + dz * dz);
 
-                    if (distance < _minDistanceFromObstacles)
+                    if (distXZ < _minDistanceFromObstacles)
                     {
                         return false;
                     }
@@ -185,15 +205,32 @@ namespace SledSurfers.Gameplay.Level
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
+            // Draw the XZ spawn area at raycast origin height
+            Vector3 center = new Vector3(
+                (_minX + _maxX) / 2f,
+                _raycastOriginY,
+                (_minZ + _maxZ) / 2f
+            );
+            Vector3 size = new Vector3(_maxX - _minX, 0.1f, _maxZ - _minZ);
 
-            Vector3 center = (_minBounds + _maxBounds) / 2f;
-            Vector3 size = _maxBounds - _minBounds;
-
+            Gizmos.color = new Color(1f, 1f, 0f, 0.15f);
             Gizmos.DrawCube(center, size);
-
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(center, size);
+
+            // Draw raycast lines at corners
+            Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
+            DrawRayGizmo(_minX, _minZ);
+            DrawRayGizmo(_maxX, _minZ);
+            DrawRayGizmo(_minX, _maxZ);
+            DrawRayGizmo(_maxX, _maxZ);
+        }
+
+        private void DrawRayGizmo(float x, float z)
+        {
+            Vector3 from = new Vector3(x, _raycastOriginY, z);
+            Vector3 to = new Vector3(x, _raycastOriginY - _raycastDistance, z);
+            Gizmos.DrawLine(from, to);
         }
 #endif
     }
