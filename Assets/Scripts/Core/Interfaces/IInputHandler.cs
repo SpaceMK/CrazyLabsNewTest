@@ -24,7 +24,9 @@ namespace SledSurfers.Core.Interfaces
         bool IsDragging { get; }
         bool DragEnded { get; }
         Vector2 DragDelta { get; }
+
         void Enable();
         void Disable();
+        void Tick();
     }
 }

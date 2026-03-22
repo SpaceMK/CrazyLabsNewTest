@@ -9,17 +9,6 @@ using VContainer.Unity;
 
 namespace SledSurfers.Gameplay
 {
-    /// <summary>
-    /// Orchestrates the high-level gameplay flow: menu navigation and session lifecycle.
-    /// 
-    /// Delegates active-run mechanics (launch, charge, running, scoring) to RunSession.
-    /// Depends on ILevelManager for level reset — does not know about concrete
-    /// CoinLevelManager or ObstacleLevelManager (DIP).
-    /// 
-    /// Design decision: GameplayFlow remains the single IStartable/ITickable entry point
-    /// for VContainer. RunSession is a plain C# class created per-run, not a VContainer
-    /// entry point, because its lifetime is shorter than the scene lifetime.
-    /// </summary>
     public sealed class GameplayFlow : IStartable, ITickable
     {
         private readonly IInputHandler _input;
@@ -69,13 +58,8 @@ namespace SledSurfers.Gameplay
 
             _player.Initialize(_settings, _playerData, _input);
 
-            // Spawn initial level elements.
-            // This runs in Start() (IStartable), which VContainer calls AFTER
-            // all [Inject] methods have completed — so LevelPoolProvider has
-            // already initialized the pools by this point.
             ResetAllLevels();
 
-            // Subscribe to UI navigation events
             _uiService.OnPlayClicked += HandlePlayClicked;
             _uiService.OnMainMenuClicked += HandleMainMenu;
             _uiService.OnUpgradesClicked += HandleUpgradesClicked;
@@ -90,6 +74,11 @@ namespace SledSurfers.Gameplay
 
         public void Tick()
         {
+            // Tick input first — reads raw mouse/touch state and updates
+            // DragDelta, DragStarted, DragEnded for the current frame.
+            // This must run before RunSession.Tick() consumes those values.
+            _input.Tick();
+
             if (_currentPhase == FlowPhase.Playing)
             {
                 _currentRun?.Tick();

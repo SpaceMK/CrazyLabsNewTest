@@ -1,24 +1,13 @@
 using System;
 using SledSurfers.Core.Interfaces;
-using SledSurfers.Data.ScriptableObjects;
 using UnityEngine;
 
 namespace SledSurfers.Gameplay.Player
 {
-    /// <summary>
-    /// Handles all player physics: launch, downhill acceleration, steering, drag.
-    /// Single point of contact for all Rigidbody interactions.
-    /// 
-    /// Exposes events for other systems (Camera, UI, MomentumTracker) to subscribe to.
-    /// SRP - only physics, no game logic.
-    /// </summary>
-    public sealed class PlayerMotor : IPlayerMotor
+    public sealed class PlayerMotorController : IPlayerMotor
     {
         private readonly Rigidbody _rigidbody;
-        private GameSettings _settings;
-
-        private float _maxSpeed;
-        private float _steeringSpeed;
+        private PlayerMotorConfig _config;
         private float _lastReportedSpeed;
 
         public Vector3 Velocity => _rigidbody.linearVelocity;
@@ -29,17 +18,15 @@ namespace SledSurfers.Gameplay.Player
         public event Action OnLaunched;
         public event Action OnHalted;
 
-        public PlayerMotor(Rigidbody rigidbody, GameSettings settings, int maxSpeedLevel, int steeringLevel)
+        public PlayerMotorController(Rigidbody rigidbody, PlayerMotorConfig config)
         {
             _rigidbody = rigidbody;
-            UpdateStats(settings, maxSpeedLevel, steeringLevel);
+            _config = config;
         }
 
-        public void UpdateStats(GameSettings settings, int maxSpeedLevel, int steeringLevel)
+        public void UpdateConfig(PlayerMotorConfig config)
         {
-            _settings = settings;
-            _maxSpeed = _settings.BaseMaxSpeed + _settings.MaxSpeedPerLevel * (maxSpeedLevel - 1);
-            _steeringSpeed = _settings.BaseSteeringSpeed + _settings.SteeringSpeedPerLevel * (steeringLevel - 1);
+            _config = config;
         }
 
         public void Launch(Vector3 force)
@@ -47,7 +34,7 @@ namespace SledSurfers.Gameplay.Player
             _rigidbody.isKinematic = false;
             _rigidbody.AddForce(force, ForceMode.Impulse);
 
-            Debug.Log($"[PlayerMotor] Launched with force: {force.magnitude:F1}");
+            Debug.Log($"[PlayerMotorController] Launched with force: {force.magnitude:F1}");
             OnLaunched?.Invoke();
         }
 
@@ -55,13 +42,12 @@ namespace SledSurfers.Gameplay.Player
         {
             if (Mathf.Abs(horizontalInput) < 0.01f) return;
 
-            Vector3 steerForce = Vector3.right * (horizontalInput * _steeringSpeed);
+            Vector3 steerForce = Vector3.right * (horizontalInput * _config.SteeringSpeed);
             _rigidbody.AddForce(steerForce, ForceMode.Acceleration);
 
-            // Clamp lateral velocity to prevent excessive sideways drift
             Vector3 vel = _rigidbody.linearVelocity;
             float lateralSpeed = Mathf.Abs(vel.x);
-            float maxLateral = _steeringSpeed * 0.8f;
+            float maxLateral = _config.SteeringSpeed * 0.8f;
 
             if (lateralSpeed > maxLateral)
             {
@@ -72,9 +58,9 @@ namespace SledSurfers.Gameplay.Player
 
         public void ApplyDownhillForce(float deltaTime)
         {
-            if (CurrentSpeed >= _maxSpeed) return;
+            if (CurrentSpeed >= _config.MaxSpeed) return;
 
-            Vector3 downhillForce = Vector3.forward * _settings.DownhillAcceleration;
+            Vector3 downhillForce = Vector3.forward * _config.DownhillAcceleration;
             _rigidbody.AddForce(downhillForce, ForceMode.Acceleration);
         }
 
@@ -85,18 +71,16 @@ namespace SledSurfers.Gameplay.Player
 
             if (forwardSpeed > 0f)
             {
-                float dragForce = _settings.DragCoefficient * forwardSpeed * forwardSpeed * 0.001f;
+                float dragForce = _config.DragCoefficient * forwardSpeed * forwardSpeed * 0.001f;
                 Vector3 drag = -vel.normalized * dragForce;
                 _rigidbody.AddForce(drag, ForceMode.Acceleration);
             }
 
-            // Hard clamp max speed
-            if (CurrentSpeed > _maxSpeed)
+            if (CurrentSpeed > _config.MaxSpeed)
             {
-                _rigidbody.linearVelocity = vel.normalized * _maxSpeed;
+                _rigidbody.linearVelocity = vel.normalized * _config.MaxSpeed;
             }
 
-            // Notify subscribers of speed change (throttled to avoid spam)
             float speed = CurrentSpeed;
             if (Mathf.Abs(speed - _lastReportedSpeed) > 0.1f)
             {

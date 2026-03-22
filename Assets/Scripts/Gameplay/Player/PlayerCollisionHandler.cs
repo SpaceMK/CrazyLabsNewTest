@@ -7,8 +7,7 @@ namespace SledSurfers.Gameplay.Player
     /// <summary>
     /// Handles player collisions with obstacles and collectibles.
     /// 
-    /// Depends on ICoinDespawner (not CoinLevelManager) to return
-    /// collected coins to pool — DIP.
+    /// Depends on IEntityDespawner (generic) to return collected entities to pool — DIP.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Collider))]
@@ -17,15 +16,15 @@ namespace SledSurfers.Gameplay.Player
         private const string ObstacleTag = "Obstacle";
         private const string CoinTag = "Coin";
 
-        private ICoinDespawner _coinDespawner;
+        private IEntityDespawner _entityDespawner;
 
         public event Action OnCrash;
         public event Action<int> OnCoinCollected;
 
-        public void Initialize(ICoinDespawner coinDespawner)
+        public void Initialize(IEntityDespawner entityDespawner)
         {
-            _coinDespawner = coinDespawner;
-            Debug.Log("[PlayerCollisionHandler] Initialized with ICoinDespawner.");
+            _entityDespawner = entityDespawner;
+            Debug.Log("[PlayerCollisionHandler] Initialized with IEntityDespawner.");
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -44,7 +43,7 @@ namespace SledSurfers.Gameplay.Player
                 Debug.Log($"[Collision] Coin collected: {other.gameObject.name}");
 
                 OnCoinCollected?.Invoke(1);
-                _coinDespawner?.DespawnCoin(other.gameObject);
+                _entityDespawner?.DespawnEntity(other.gameObject);
             }
         }
     }

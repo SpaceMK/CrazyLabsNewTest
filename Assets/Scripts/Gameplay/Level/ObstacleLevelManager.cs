@@ -6,22 +6,6 @@ using VContainer;
 
 namespace SledSurfers.Gameplay.Level
 {
-    /// <summary>
-    /// Manages obstacle placement on the level.
-    /// Implements ISpawnPositionProvider so CoinLevelManager can avoid spawning near obstacles.
-    /// Implements ILevelManager so GameplayFlow can reset without knowing the concrete type.
-    /// 
-    /// Spawning strategy:
-    /// Generates random (X, Z) candidates within bounds, then raycasts downward from
-    /// a high Y to find the actual ground surface. This works on any geometry — flat,
-    /// sloped, zigzag chunks, or uneven terrain. If a raycast misses (candidate is
-    /// over a gap between chunks), the position is discarded and a new one is tried.
-    /// 
-    /// Objects are rotated to align with the surface normal so they sit flush.
-    /// 
-    /// NOTE: Initialize() only wires dependencies — it does NOT spawn.
-    /// Spawning is triggered by GameplayFlow.Start() via ILevelManager.Reset().
-    /// </summary>
     public class ObstacleLevelManager : MonoBehaviour, ISpawnPositionProvider, ILevelManager
     {
         [Header("Spawn Bounds (XZ area to scatter within)")]

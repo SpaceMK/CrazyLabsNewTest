@@ -10,14 +10,8 @@ namespace SledSurfers.Gameplay.Player
     /// Facade MonoBehaviour that lives on the Player GameObject.
     /// Composes runtime instances of motor, slingshot, momentum tracker, etc.
     /// 
-    /// Sub-systems communicate via events — no need to route through GameplayFlow.
-    /// 
-    /// ICoinDespawner is injected via VContainer [Inject] so we avoid
-    /// FindFirstObjectByType (which defeated the DI architecture).
-    /// 
-    /// Ticks the IInputHandler each frame so SimpleInputHandler can track
-    /// drag state from mouse/touch. This is necessary because SimpleInputHandler
-    /// is a plain C# class (not a MonoBehaviour) and needs a frame-driven update.
+    /// Responsible for creating config data objects and passing them to controllers.
+    /// Controllers own behavior; this class owns composition and lifecycle.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(PlayerCollisionHandler))]
@@ -28,12 +22,11 @@ namespace SledSurfers.Gameplay.Player
         private PlayerCollisionHandler _collisionHandler;
         private PlayerPhysicsController _physicsController;
         private Vector3 _startingPosition;
-        private PlayerMotor _motor;
+        private PlayerMotorController _motor;
         private SlingshotController _slingshot;
         private MomentumTracker _momentumTracker;
 
-        private ICoinDespawner _coinDespawner;
-        private IInputHandler _input;
+        private IEntityDespawner _entityDespawner;
         private bool _isInitialized;
 
         // Expose interfaces for external consumers
@@ -47,15 +40,13 @@ namespace SledSurfers.Gameplay.Player
         public float FinalDistance = 0f;
 
         [Inject]
-        public void Construct(ICoinDespawner coinDespawner)
+        public void Construct(IEntityDespawner entityDespawner)
         {
-            _coinDespawner = coinDespawner;
+            _entityDespawner = entityDespawner;
         }
 
         public void Initialize(GameSettings settings, Data.Models.PlayerData playerData, IInputHandler input)
         {
-            _input = input;
-
             if (_rigidbody == null)
                 _rigidbody = GetComponent<Rigidbody>();
             if (_collisionHandler == null)
@@ -68,21 +59,20 @@ namespace SledSurfers.Gameplay.Player
             _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 
+            // Build config data objects from settings + upgrade levels
+            var motorConfig = new PlayerMotorConfig(settings, playerData.MaxSpeedLevel, playerData.SteeringLevel);
+            var slingshotConfig = new SlingshotConfig(settings, playerData.LaunchPowerLevel);
+
             if (!_isInitialized)
             {
-                _motor = new PlayerMotor(
-                    _rigidbody,
-                    settings,
-                    playerData.MaxSpeedLevel,
-                    playerData.SteeringLevel
-                );
+                _motor = new PlayerMotorController(_rigidbody, motorConfig);
 
-                _slingshot = new SlingshotController(settings, playerData.LaunchPowerLevel);
+                _slingshot = new SlingshotController(slingshotConfig);
 
                 _momentumTracker = new MomentumTracker(_motor);
 
                 _physicsController.Initialize(_motor, input);
-                _collisionHandler.Initialize(_coinDespawner);
+                _collisionHandler.Initialize(_entityDespawner);
 
                 _isInitialized = true;
 
@@ -92,8 +82,9 @@ namespace SledSurfers.Gameplay.Player
             }
             else
             {
-                _motor.UpdateStats(settings, playerData.MaxSpeedLevel, playerData.SteeringLevel);
-                _slingshot.UpdateStats(settings, playerData.LaunchPowerLevel);
+                // Update configs on existing controllers — no recreation needed
+                _motor.UpdateConfig(motorConfig);
+                _slingshot.UpdateConfig(slingshotConfig);
 
                 Debug.Log($"[PlayerManager] Updated stats " +
                           $"(Speed Lv{playerData.MaxSpeedLevel}, Steering Lv{playerData.SteeringLevel}, " +
@@ -104,17 +95,6 @@ namespace SledSurfers.Gameplay.Player
         private void Start()
         {
             _startingPosition = transform.position;
-        }
-
-        private void Update()
-        {
-            // Tick the input handler so it can track drag state.
-            // SimpleInputHandler is a plain C# class that reads Input.*
-            // each frame — it needs this manual tick.
-            if (_input is SimpleInputHandler simpleInput)
-            {
-                simpleInput.Tick();
-            }
         }
 
         public void CalculateDistance()
