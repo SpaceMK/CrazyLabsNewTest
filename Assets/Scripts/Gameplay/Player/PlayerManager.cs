@@ -18,6 +18,9 @@ namespace SledSurfers.Gameplay.Player
     [RequireComponent(typeof(PlayerPhysicsController))]
     public class PlayerManager : MonoBehaviour
     {
+        [Header("Visuals")]
+       
+
         private Rigidbody _rigidbody;
         private PlayerCollisionHandler _collisionHandler;
         private PlayerPhysicsController _physicsController;
@@ -25,6 +28,7 @@ namespace SledSurfers.Gameplay.Player
         private PlayerMotorController _motor;
         private SlingshotController _slingshot;
         private MomentumTracker _momentumTracker;
+        private SlingshotVisual _slingshotVisual;
 
         private IEntityDespawner _entityDespawner;
         private bool _isInitialized;
@@ -58,7 +62,7 @@ namespace SledSurfers.Gameplay.Player
             _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
             _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
-
+            _slingshotVisual = FindAnyObjectByType<SlingshotVisual>();
             // Build config data objects from settings + upgrade levels
             var motorConfig = new PlayerMotorConfig(settings, playerData.MaxSpeedLevel, playerData.SteeringLevel);
             var slingshotConfig = new SlingshotConfig(settings, playerData.LaunchPowerLevel);
@@ -73,6 +77,10 @@ namespace SledSurfers.Gameplay.Player
 
                 _physicsController.Initialize(_motor, input);
                 _collisionHandler.Initialize(_entityDespawner);
+
+                // Bind slingshot visual now that slingshot exists
+                if (_slingshotVisual != null)
+                    _slingshotVisual.Bind(_slingshot);
 
                 _isInitialized = true;
 

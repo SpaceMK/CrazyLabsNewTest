@@ -1,6 +1,7 @@
 ﻿using System;
 using SledSurfers.Core.Interfaces;
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
 
 namespace SledSurfers.Gameplay.Slingshot
 {
@@ -65,7 +66,7 @@ namespace SledSurfers.Gameplay.Slingshot
                 -_config.MaxAngleDegrees,
                 _config.MaxAngleDegrees
             );
-
+            Debug.Log($"[SlingshotVisual] pull={PullPercent:F2} angle={LaunchAngle:F2}");
             OnDragUpdated?.Invoke(PullPercent, LaunchAngle);
         }
 

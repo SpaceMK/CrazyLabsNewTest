@@ -142,7 +142,9 @@ PlayerSettings:
   tvOSBundleVersion: 1.0
   bundleVersion: 0.1.0
   preloadedAssets:
-  - {fileID: 11400000, guid: 4beabef52985e0a43b33dd0466664094, type: 2}
+  - {fileID: 0}
+  - {fileID: -944628639613478452, guid: 15b38c4c06bc20f4484ca674b4d69df0, type: 3}
+  - {fileID: 11400000, guid: f743c10f494d73545ba6d34d7feb0004, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -164,7 +166,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.4
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: com.UnityTechnologies.com.unity.template.urpblank
+    Android: com.spasoIlievski.CrazyLabsTest
     Standalone: com.Unity-Technologies.com.unity.template.urp-blank
     iPhone: com.Unity-Technologies.com.unity.template.urp-blank
   buildNumber:

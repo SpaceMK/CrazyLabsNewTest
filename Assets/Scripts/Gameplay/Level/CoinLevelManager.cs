@@ -148,6 +148,15 @@ namespace SledSurfers.Gameplay.Level
             _poolManager.Return(coin);
         }
 
+        public void DespawnEntity(GameObject entity)
+        {
+            var coin = _activeCoins.Find(c => c.GameObject == entity);
+            if (coin != null)
+            {
+                DespawnCoin(coin);
+            }
+        }
+
         public void DespawnAll()
         {
             for (int i = _activeCoins.Count - 1; i >= 0; i--)
@@ -174,15 +183,6 @@ namespace SledSurfers.Gameplay.Level
             Gizmos.DrawCube(center, size);
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(center, size);
-        }
-
-        public void DespawnEntity(GameObject entity)
-        {
-            var coin = _activeCoins.Find(c => c.GameObject == entity);
-            if (coin != null)
-            {
-                DespawnCoin(coin);
-            }
         }
 #endif
     }

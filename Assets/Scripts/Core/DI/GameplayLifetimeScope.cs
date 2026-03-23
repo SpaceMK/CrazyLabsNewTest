@@ -2,6 +2,7 @@ using SledSurfers.Core.Interfaces;
 using SledSurfers.Gameplay;
 using SledSurfers.Gameplay.Level;
 using SledSurfers.Gameplay.Player;
+using SledSurfers.Gameplay.Slingshot;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -47,6 +48,8 @@ namespace SledSurfers.Core.DI
                     .As<ILevelManager>();
             }
 
+            
+               
             builder.RegisterEntryPoint<GameplayFlow>();
         }
     }

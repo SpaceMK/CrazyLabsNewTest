@@ -1,7 +1,5 @@
 using SledSurfers.Core.Interfaces;
-using SledSurfers.Gameplay.Player;
 using UnityEngine;
-using VContainer;
 
 namespace SledSurfers.Gameplay.Slingshot
 {
@@ -44,43 +42,48 @@ namespace SledSurfers.Gameplay.Slingshot
         private Vector3 _pouchRestPosition;
         private bool _isInitialized;
 
-        [Inject]
-        public void Construct(PlayerManager playerManager)
+        private void Awake()
         {
-            _slingshot = playerManager.Slingshot;
-        }
-
-        private void Start()
-        {
-            if (_slingshot == null)
-            {
-                Debug.LogWarning("[SlingshotVisual] No slingshot reference. Visual disabled.");
-                return;
-            }
-
             if (_pouch != null)
                 _pouchRestPosition = _pouch.localPosition;
+
+            SetPouchAtRest();
+            SetAimVisible(false);
+        }
+
+        /// <summary>
+        /// Called by PlayerManager once the slingshot has been created.
+        /// </summary>
+        public void Bind(ISlingshot slingshot)
+        {
+            // Unsub from previous slingshot if re-binding (e.g. after upgrade reload)
+            Unbind();
+
+            _slingshot = slingshot;
 
             _slingshot.OnDragStarted += HandleDragStarted;
             _slingshot.OnDragUpdated += HandleDragUpdated;
             _slingshot.OnReleased += HandleReleased;
 
-            // Start hidden or at rest
-            SetPouchAtRest();
-            SetAimVisible(false);
-
             _isInitialized = true;
-            Debug.Log("[SlingshotVisual] Initialized.");
+            Debug.Log("[SlingshotVisual] Bound to slingshot.");
         }
 
-        private void OnDestroy()
+        private void Unbind()
         {
             if (_slingshot != null)
             {
                 _slingshot.OnDragStarted -= HandleDragStarted;
                 _slingshot.OnDragUpdated -= HandleDragUpdated;
                 _slingshot.OnReleased -= HandleReleased;
+                _slingshot = null;
             }
+            _isInitialized = false;
+        }
+
+        private void OnDestroy()
+        {
+            Unbind();
         }
 
         private void HandleDragStarted()
