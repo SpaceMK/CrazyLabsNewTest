@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using SledSurfers.Core.Interfaces;
 using SledSurfers.Core.Pooling;
 using UnityEngine;
@@ -6,6 +6,16 @@ using VContainer;
 
 namespace SledSurfers.Gameplay.Level
 {
+    [System.Serializable]
+    public class ObstacleSpawnEntry
+    {
+        public PoolObjectType ObstacleType;
+
+        [Tooltip("Relative spawn weight. Higher = more likely to spawn.")]
+        [Range(0.01f, 100f)]
+        public float weight = 1f;
+    }
+
     public class ObstacleLevelManager : MonoBehaviour, ISpawnPositionProvider, ILevelManager
     {
         [Header("Spawn Bounds (XZ area to scatter within)")]
@@ -33,20 +43,45 @@ namespace SledSurfers.Gameplay.Level
         [SerializeField] private float _minDistanceBetweenObstacles = 5f;
         [SerializeField] private int _maxSpawnAttempts = 50;
 
+        [Header("Obstacle Types")]
+        [Tooltip("Which obstacle pool types to spawn and their relative weights.")]
+        [SerializeField]
+        private List<ObstacleSpawnEntry> _obstacleTypes = new List<ObstacleSpawnEntry>();
+
+        private float _totalWeight;
         private IPoolManager _poolManager;
         private readonly List<IPoolingObject> _activeObstacles = new();
         private readonly List<Vector3> _spawnedPositions = new();
 
         public IReadOnlyList<IPoolingObject> ActiveObstacles => _activeObstacles;
-
-        /// <summary>
-        /// Wires dependencies only — does NOT spawn. See class summary.
-        /// </summary>
         [Inject]
         public void Initialize(IPoolManager poolManager)
         {
             _poolManager = poolManager;
+            CacheTotalWeight();
             Debug.Log("[ObstacleLevelManager] Initialized.");
+        }
+
+        private void CacheTotalWeight()
+        {
+            _totalWeight = 0f;
+            foreach (var entry in _obstacleTypes)
+                _totalWeight += entry.weight;
+        }
+
+        private PoolObjectType GetRandomObstacleType()
+        {
+            float roll = Random.Range(0f, _totalWeight);
+            float cumulative = 0f;
+
+            foreach (var entry in _obstacleTypes)
+            {
+                cumulative += entry.weight;
+                if (roll <= cumulative)
+                    return entry.ObstacleType;
+            }
+
+            return _obstacleTypes[_obstacleTypes.Count - 1].ObstacleType;
         }
 
         public IReadOnlyList<Vector3> GetOccupiedPositions()
@@ -117,7 +152,7 @@ namespace SledSurfers.Gameplay.Level
 
         public IPoolingObject SpawnObstacle(Vector3 position, Vector3 surfaceNormal)
         {
-            var obstacle = _poolManager.Get(PoolObjectType.Obstacle);
+            var obstacle = _poolManager.Get(GetRandomObstacleType());
             if (obstacle == null) return null;
 
             var t = obstacle.GameObject.transform;
